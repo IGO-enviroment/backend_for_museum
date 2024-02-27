@@ -6,7 +6,7 @@ on:
 
 jobs:
   use-build:
-    uses: ./.github/workflows/build.yml@main
+    uses: IGO-enviroment/backend_for_museum/.github/workflows/build.yml@main
 
   deploy:
     needs: use-build
