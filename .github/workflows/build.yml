@@ -1,7 +1,7 @@
 name: Museum-Workflow
  
 on:
-  workflow_call:
+  workflow_call: "on"
   push:
     branches-ignore: main
 
