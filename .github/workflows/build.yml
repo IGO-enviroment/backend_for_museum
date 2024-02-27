@@ -23,7 +23,7 @@ jobs:
         run: go mod download
 
       - name: Build-Golang-App
-        run: GOOS=linux GOARCH=amd64 go build -o bin/linux_bin
+        run: GOOS=linux GOARCH=amd64 go build -o ./bin/linux_bin ./cmd/main.go 
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
