@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+
+  postgres:
+    container_name: golangpg
+    image: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'pass'
+      POSTGRES_DB: 'postgres'
+    ports:
+      - 5432:5432
+
+  redis:
+    container_name: golangredis
+    image: redis:alpine
+    command: --port 6385
+    ports:
+      - 6385:6385
+
+  app:
+    build: ../
+    restart: always
+    container_name: app
+    image: app
+    environment:
+      PG_URL: 'postgres://user:pass@localhost:5432/postgres'
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+volumes:
+  pg-data:

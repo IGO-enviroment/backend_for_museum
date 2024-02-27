@@ -1,0 +1,22 @@
+app:
+  name: go-clean-template
+  version: 1.0.0
+
+http:
+  host: 127.0.0.1
+  port: 8080
+  jwt_secret_key: my-very-secret
+  jwt_separate_key: AuthBearMuseum
+
+logger:
+  log_level: debug
+  rollbar_env: go-clean-template
+
+postgres:
+  pool_max: 2
+
+redis:
+  url: ""
+
+env:
+  level: development

@@ -1,0 +1,143 @@
+info:
+  contact: {}
+paths:
+  /v1/admin/posts:
+    get:
+      consumes:
+      - application/json
+      description: Вывод таблицы по всем постам
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Все посты
+      tags:
+      - Админка
+    post:
+      consumes:
+      - application/json
+      description: Создание нового поста
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Создание новой новости
+      tags:
+      - Админка
+  /v1/admin/posts/{id}/show:
+    get:
+      consumes:
+      - application/json
+      description: Вывод одного поста
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Отображение конкретного поста
+      tags:
+      - Админка
+  /v1/admin/posts/publish/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Статья больше не будет отображаться для пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Убрать статью с публикации
+      tags:
+      - Админка
+  /v1/admin/posts/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Создание нового поста
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Обновление данных поста
+      tags:
+      - Админка
+  /v1/auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Поиск пользователя по токену
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Получение текущего пользователя
+      tags:
+      - Авторизация
+  /v1/auth/sign_in:
+    post:
+      consumes:
+      - application/json
+      description: Проверка почты и пароля, генерация токена
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Вход
+      tags:
+      - Авторизация
+  /v1/auth/sign_up:
+    post:
+      consumes:
+      - application/json
+      description: Ввод почты, пароля и подтверждение пароля
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Регистрация
+      tags:
+      - Авторизация
+swagger: "2.0"
