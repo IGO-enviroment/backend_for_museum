@@ -23,7 +23,7 @@ jobs:
           name: build-artifact
           # where to save the artifact
           # using the same path as in the build workflow "restores" the state from the end of the build workflow
-          path: dist
+          path: bin
 
       - name: Copy-Build-Golang-App
         uses: appleboy/scp-action@master
@@ -32,7 +32,7 @@ jobs:
           username: '${{ secrets.VM_USERNAME }}'
           key: '${{ secrets.VM_SSH_KEY }}'
           port: '${{ secrets.VM_SSH_PORT }}'
-          source: dist/bin/
+          source: bin/
           target: /project/bin
 
       - name: Deploy-Build-Golang-App-To-Ubuntu-VM
