@@ -1,8 +1,10 @@
 name: Museum-Workflow
-  on:
-    push:
-      branches:
-        - main
+ 
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build-app:
     runs-on: ubuntu-latest
@@ -21,9 +23,6 @@ jobs:
 
       - name: Build-Golang-App
         run: GOOS=linux GOARCH=amd64 go build -o bin/linux_bin
-
-      - name: Create-Env-File
-        run: 'echo "APIKey=${{ secrets.APIKey }}" > bin/.env'
 
       # - name: Run-Unit-Test-Golang-App
       #  run: go test
