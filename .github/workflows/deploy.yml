@@ -34,7 +34,7 @@ jobs:
           port: '${{ secrets.VM_SSH_PORT }}'
           passphrase: '${{ secrets.VM_SSH_PASS }}'
           source: bin/
-          target: ~/project/bin
+          target: ~/project
 
       - name: Deploy-Build-Golang-App-To-Ubuntu-VM
         uses: appleboy/ssh-action@master
