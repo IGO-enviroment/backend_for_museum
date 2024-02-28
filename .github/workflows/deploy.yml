@@ -45,5 +45,5 @@ jobs:
           port: '${{ secrets.VM_SSH_PORT }}'
           passphrase: '${{ secrets.VM_SSH_PASS }}'
           script: |
-            sudo systemctl restart museum-server
-            sudo systemctl status museum-server 
+            cd ~/project
+            touch resetart.txt
