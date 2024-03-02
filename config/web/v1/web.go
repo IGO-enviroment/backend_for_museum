@@ -15,13 +15,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/template/html/v2"
 	"golang.org/x/text/language"
 )
 
 type Server struct {
-	cfg *config.Config
-	app *fiber.App
-	l   *logger.Logger
+	cfg   *config.Config
+	app   *fiber.App
+	l     *logger.Logger
+	templ *html.Engine
 }
 
 func RunServer(cfg *config.Config) {
@@ -37,6 +39,7 @@ func (s *Server) Run() {
 		fiber.Config{
 			JSONEncoder: json.Marshal,
 			JSONDecoder: json.Unmarshal,
+			Views:       s.templ,
 		},
 	)
 
@@ -68,6 +71,9 @@ func (s *Server) dependency() {
 		s.l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 	defer queueCli.Close()
+
+	// Настройка шаблонов страниц
+	s.templ = html.New("./app/views", ".html")
 }
 
 // Настройка сервера fiber

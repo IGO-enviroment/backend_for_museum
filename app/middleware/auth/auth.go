@@ -4,7 +4,6 @@
 package middleware
 
 import (
-	"fmt"
 	"museum/app/handlers/helpers"
 	users "museum/app/models/user"
 	"strconv"
@@ -30,7 +29,6 @@ func AuthAccess(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusForbidden)
 	}
 
-	fmt.Println(token.Claims.(jwt.MapClaims))
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return ctx.SendStatus(fiber.StatusUnauthorized)

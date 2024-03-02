@@ -38,8 +38,6 @@ func (r *authRoutes) SignUp(ctx *fiber.Ctx) error {
 
 	err := validator.New().Struct(req)
 	if err != nil {
-		errors := err.(validator.ValidationErrors)
-		fmt.Println(errors.Error())
 		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
 	}
 
@@ -62,7 +60,6 @@ func (r *authRoutes) SignUp(ctx *fiber.Ctx) error {
 func (r *authRoutes) SignIn(ctx *fiber.Ctx) error {
 	// user := models.NewUser()
 	token, err := helpers.GenerateToken("1", "email")
-	fmt.Printf("%s", err)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -79,6 +76,10 @@ func (r *authRoutes) SignIn(ctx *fiber.Ctx) error {
 // @Success      200
 // @Router       /v1/auth/me [get]
 func (r *authRoutes) GetMe(ctx *fiber.Ctx) error {
-	user := ctx.Locals("currentUser").(*models.User)
+	user, ok := ctx.Locals("currentUser").(*models.User)
+	if !ok {
+		return ctx.SendStatus(fiber.StatusForbidden)
+	}
+
 	return ctx.Status(fiber.StatusGone).JSON(fiber.Map{"email": user.Email})
 }

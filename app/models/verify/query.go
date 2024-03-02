@@ -30,19 +30,8 @@ func (q *VerifyQuery) FindByID(id int) (*Verify, error) {
 	return q.v, nil
 }
 
-func (q *VerifyQuery) FindByCode(id int, code string) (*Verify, error) {
-	sql, args, err := q.Store().Where("id = ? AND uniq_code = ?", id, code).Limit(1).ToSql()
-	if err != nil {
-		return nil, err
-	}
-	if err := q.db.Pool.QueryRow(context.Background(), sql, args...).Scan(q.v.Attr.MapField(q.v)...); err != nil {
-		return nil, err
-	}
-	return q.v, nil
-}
-
-func (q *VerifyQuery) FindByQRCode(id int, code string) (*Verify, error) {
-	sql, args, err := q.Store().Where("id = ? AND qr_code = ?", id, code).Limit(1).ToSql()
+func (q *VerifyQuery) FindByCode(code string) (*Verify, error) {
+	sql, args, err := q.Store().Where("uniq_code = ?", code).Limit(1).ToSql()
 	if err != nil {
 		return nil, err
 	}

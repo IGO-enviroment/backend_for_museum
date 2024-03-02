@@ -7,10 +7,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type postsRoutes struct{}
+type postsRoutes struct {
+	layout string
+}
 
 func NewPostsRoutes() *postsRoutes {
-	return &postsRoutes{}
+	return &postsRoutes{
+		layout: "layouts/admin",
+	}
 }
 
 // Create godoc
@@ -48,7 +52,14 @@ func (p *postsRoutes) Update(ctx *fiber.Ctx) error {
 // @Success      200
 // @Router       /v1/admin/posts [get]
 func (p *postsRoutes) Index(ctx *fiber.Ctx) error {
-	return ctx.SendStatus(fiber.StatusCreated)
+	all_posts := []string{"123", "123"}
+	return ctx.Render(
+		"admin/posts/index",
+		fiber.Map{
+			"Posts": all_posts,
+		},
+		p.layout,
+	)
 }
 
 // Show godoc
