@@ -46,4 +46,5 @@ jobs:
           passphrase: '${{ secrets.VM_SSH_PASS }}'
           script: |
             cd ~/project
+            git pull origin main
             touch resetart.txt
