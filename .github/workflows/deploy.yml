@@ -45,6 +45,5 @@ jobs:
           port: '${{ secrets.VM_SSH_PORT }}'
           passphrase: '${{ secrets.VM_SSH_PASS }}'
           script: |
-            cd ~/project
-            git pull origin main
-            touch resetart.txt
+            cd ~/project && git pull origin main
+            touch ~/restart/restart.txt
