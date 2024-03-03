@@ -9,16 +9,25 @@ import (
 	entity "museum/app/entity/auth"
 	"museum/app/handlers/helpers"
 	models "museum/app/models/user"
+	"museum/pkg/postgres"
+
+	"museum/pkg/logger"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
-type authRoutes struct{}
+type authRoutes struct {
+	db *postgres.Postgres
+	l  *logger.Logger
+}
 
 // Подключение роутов обработки авторизации
-func NewAuthRoutes() *authRoutes {
-	return &authRoutes{}
+func NewAuthRoutes(db *postgres.Postgres, l *logger.Logger) *authRoutes {
+	return &authRoutes{
+		db: db,
+		l:  l,
+	}
 }
 
 // SignUp godoc

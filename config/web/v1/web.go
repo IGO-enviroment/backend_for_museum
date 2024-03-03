@@ -20,9 +20,11 @@ import (
 )
 
 type Server struct {
-	cfg   *config.Config
-	app   *fiber.App
-	l     *logger.Logger
+	cfg *config.Config
+	app *fiber.App
+	db  *postgres.Postgres
+	l   *logger.Logger
+
 	templ *html.Engine
 }
 
@@ -47,7 +49,7 @@ func (s *Server) Run() {
 	s.settingApp()
 
 	// Настройка роутов
-	SetRoutes(s.app)
+	SetRoutes(s)
 
 	// Запуск сервера
 	log.Fatal(s.app.Listen(fmt.Sprintf("%s:%s", s.cfg.HTTP.HOST, s.cfg.HTTP.Port)))
@@ -55,15 +57,16 @@ func (s *Server) Run() {
 
 // Настройка зависимых приложений
 func (s *Server) dependency() {
+	var err error
 	// Настройка логера
 	s.l = logger.New(s.cfg.Log.Level)
 
 	// Настройка базы
-	pg, err := postgres.New(s.cfg.PG.URL)
+	s.db, err = postgres.New(s.cfg.PG.URL)
 	if err != nil {
 		s.l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
-	defer pg.Close()
+	defer s.db.Close()
 
 	// Подключение отоложенных задач
 	queueCli, err := queue.New("")

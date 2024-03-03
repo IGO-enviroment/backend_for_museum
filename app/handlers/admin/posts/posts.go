@@ -1,18 +1,14 @@
-/*
- * Статистика по продажам билетов
- */
+// Статистика по продажам билетов
 package handlers
 
-import (
-	"github.com/gofiber/fiber/v2"
-)
+import "github.com/gofiber/fiber/v2"
 
-type postsRoutes struct {
+type PostsRoutes struct {
 	layout string
 }
 
-func NewPostsRoutes() *postsRoutes {
-	return &postsRoutes{
+func NewPostsRoutes() *PostsRoutes {
+	return &PostsRoutes{
 		layout: "layouts/admin",
 	}
 }
@@ -26,7 +22,7 @@ func NewPostsRoutes() *postsRoutes {
 // @Param        q    query     string  false  "name search by q"  Format(email)
 // @Success      200
 // @Router       /v1/admin/posts [post]
-func (p *postsRoutes) Create(ctx *fiber.Ctx) error {
+func (p *PostsRoutes) Create(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusCreated)
 }
 
@@ -38,7 +34,7 @@ func (p *postsRoutes) Create(ctx *fiber.Ctx) error {
 // @Produce      json
 // @Success      200
 // @Router       /v1/admin/posts/update/{id} [put]
-func (p *postsRoutes) Update(ctx *fiber.Ctx) error {
+func (p *PostsRoutes) Update(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusCreated)
 }
 
@@ -51,12 +47,12 @@ func (p *postsRoutes) Update(ctx *fiber.Ctx) error {
 // @Param        q    query     string  false  "name search by q"  Format(email)
 // @Success      200
 // @Router       /v1/admin/posts [get]
-func (p *postsRoutes) Index(ctx *fiber.Ctx) error {
-	all_posts := []string{"123", "123"}
+func (p *PostsRoutes) Index(ctx *fiber.Ctx) error {
+	allPosts := []string{"123", "123", ""}
 	return ctx.Render(
 		"admin/posts/index",
 		fiber.Map{
-			"Posts": all_posts,
+			"Posts": allPosts,
 		},
 		p.layout,
 	)
@@ -71,6 +67,6 @@ func (p *postsRoutes) Index(ctx *fiber.Ctx) error {
 // @Param        q    query     string  false  "name search by q"  Format(email)
 // @Success      200
 // @Router       /v1/admin/posts/{id}/show [get]
-func (p *postsRoutes) Show(ctx *fiber.Ctx) error {
+func (p *PostsRoutes) Show(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusCreated)
 }
