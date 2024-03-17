@@ -7,7 +7,7 @@ compose-up: ### Run docker-compose
 swag-v1: ### swag init
 	swag init -g config/web/v1/routes.go
 
-run: swag-v1
+run: #swag-v1
 	go mod tidy && go mod download && \
 	DISABLE_SWAGGER_HTTP_HANDLER='' CGO_ENABLED=0 go run -tags migrate ./cmd
 

@@ -51,6 +51,22 @@ linters-settings:
   nolintlint:
     require-explanation: true
     require-specific: true
+  depguard:
+    rules:
+      main:
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+          - museum
+          - github.com/gofiber
+      test:
+        files:
+          - "$test"
+        allow:
+          - $gostd
+          - github.com/stretchr
 
 linters:
   disable-all: true

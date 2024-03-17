@@ -1,9 +1,8 @@
 package v1
 
 import (
-	handlers "museum/app/handlers"
-	posts_handlers "museum/app/handlers/admin/posts"
-	topics_handelrs "museum/app/handlers/admin/topic"
+	admin_handlers "museum/app/handlers/admin"
+	client_handlers "museum/app/handlers/client"
 	"museum/app/middleware"
 )
 
@@ -12,26 +11,37 @@ func SetRoutes(s *Server) {
 
 	authPermissions := middleware.NewAuthAccess(s.db, s.l)
 
-	// Авторизация
-	auth := v1.Group("/auth")
+	// Сторона пользователя
+	client := v1.Group("/client")
 	{
-		authController := handlers.NewAuthRoutes(s.db, s.l)
-		auth.Post("/sign_in", authController.SignIn)
-		auth.Post("/sign_up", authController.SignUp)
-		auth.Get("/me", authPermissions.Аuthorized, authController.GetMe)
+		// Глобальный поиск по контенту
+		searchController := client_handlers.NewContentSearchRoutes(s.db, s.l)
+		client.Get("/content/search", searchController.Search)
+
+		// Афиша (главная страница)
+		billboardsController := client_handlers.NewBillboardsRoutes(s.db, s.l)
+		client.Get("/billboard", billboardsController.Index)
+
+		// Данные общего списка мероприятий
+		eventsController := client_handlers.NewClientEventsRoutes(s.db, s.l)
+		client.Get("/index", eventsController.Index)
+		client.Get("/filter", eventsController.Filter)
+
+		// Данные по популярным фильтрам
+		popularFilters := client_handlers.NewPopularFiltersRoutes(s.db, s.l)
+		client.Get("/popular/filters", popularFilters.Index)
 	}
 
-	// Проверка билетов
-	// v1.Get("/verify/info/:code")
-
 	// Админская часть
-	admin := v1.Group("/admin", authPermissions.Аuthorized, authPermissions.AdminAccess)
+	admin := v1.Group(
+		"/admin",
+		authPermissions.Аuthorized, authPermissions.AdminAccess,
+	)
 	{
-		// sales := admin.Group("/sales")
 		// Работа с постами
 		posts := admin.Group("/posts")
 		{
-			postsController := posts_handlers.NewPostsRoutes()
+			postsController := admin_handlers.NewPostsRoutes()
 			posts.Put("/update/:id/", postsController.Update)
 			posts.Put("/:id/show", postsController.Show)
 			posts.Get("/", postsController.Index)
@@ -41,7 +51,7 @@ func SetRoutes(s *Server) {
 		// Темы событий, новостей и т.д.
 		topics := admin.Group("/topics")
 		{
-			topicsController := topics_handelrs.NewTopicRoutes()
+			topicsController := admin_handlers.NewTopicRoutes()
 			topics.Put("/update/:id", topicsController.Update)
 			topics.Get("/", topicsController.Index)
 			topics.Post("/", topicsController.Create)

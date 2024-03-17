@@ -3,14 +3,14 @@ BEGIN;
 
 create table users (
     id serial PRIMARY KEY,              -- Уникальный ID 
+
     email VARCHAR(255) UNIQUE,          -- Уникальная почта
     password_digest VARCHAR(255),       -- Зашифрованный пароль
-    password_reset_token VARCHAR(255),  -- Токен для восстановления пароля
-    password_reset_sent_at TIMESTAMP,   -- Время установки токена восстановления пароля
+
+    is_admin BOOLEAN NOT NULL DEFAULT "0", -- Админ или нет
 
     -- Таймстамп
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 COMMIT;

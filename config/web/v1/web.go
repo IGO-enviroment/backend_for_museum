@@ -79,7 +79,7 @@ func (s *Server) dependency() {
 	s.templ = html.New("./app/views", ".html")
 }
 
-// Настройка сервера fiber
+// Настройка сервера fiber.
 func (s *Server) settingApp() {
 	// Перехват паники
 	s.app.Use(recover.New())

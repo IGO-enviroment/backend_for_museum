@@ -4,8 +4,8 @@
 package middleware
 
 import (
-	"museum/app/handlers/helpers"
 	users "museum/app/models/user"
+	"museum/app/utils"
 	"museum/pkg/logger"
 	"museum/pkg/postgres"
 	"strconv"
@@ -83,7 +83,7 @@ func (a *AuthAccess) AdminAccess(ctx *fiber.Ctx) error {
 // Парсинг токена
 func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte(helpers.JwtSecretKey()), nil
+		return []byte(utils.JwtSecretKey()), nil
 	})
 	if err != nil || !token.Valid {
 		return token, false
@@ -94,7 +94,7 @@ func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 
 // Очистка лишнего из строки с токеном
 func (a *AuthAccess) clearToken(authField string) string {
-	splited := strings.Split(authField, helpers.JwtSeparateKey())
+	splited := strings.Split(authField, utils.JwtSeparateKey())
 	token := splited[len(splited)-1]
 
 	return strings.TrimSpace(token)

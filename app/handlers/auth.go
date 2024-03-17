@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	entity "museum/app/entity/auth"
-	"museum/app/handlers/helpers"
 	models "museum/app/models/user"
+	"museum/app/utils"
 	"museum/pkg/postgres"
 
 	"museum/pkg/logger"
@@ -50,7 +50,7 @@ func (r *authRoutes) SignUp(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
 	}
 
-	token, err := helpers.GenerateToken("1", "email")
+	token, err := utils.GenerateToken("1", "email")
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -68,7 +68,7 @@ func (r *authRoutes) SignUp(ctx *fiber.Ctx) error {
 // @Router       /v1/auth/sign_in [post]
 func (r *authRoutes) SignIn(ctx *fiber.Ctx) error {
 	// user := models.NewUser()
-	token, err := helpers.GenerateToken("1", "email")
+	token, err := utils.GenerateToken("1", "email")
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
