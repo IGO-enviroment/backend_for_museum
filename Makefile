@@ -5,7 +5,7 @@ compose-up: ### Run docker-compose
 	cd ./infra && docker-compose up --build -d postgres redis && docker-compose logs -f
 
 swag-v1: ### swag init
-	swag init -g config/web/v1/routes.go
+	swag init -g config/web/v1/routes.go --parseDependency
 
 run: #swag-v1
 	go mod tidy && go mod download && \
