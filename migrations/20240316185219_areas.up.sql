@@ -9,6 +9,8 @@ create table areas (
 
     publish BOOLEAN DEFAULT 0,  -- Видна ли площадка всем польз.
 
+    address_value VARCHAR(255), -- Адрес площадки
+
     -- Таймстамп
     created_at TIMESTAMP DEFAULT NOW()
 );
