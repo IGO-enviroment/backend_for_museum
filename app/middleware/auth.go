@@ -1,10 +1,7 @@
-/*
- * Промежуточные проверки перед обратокой контроллеров
- */
 package middleware
 
 import (
-	users "museum/app/models/user"
+	"museum/app/models"
 	"museum/app/utils"
 	"museum/pkg/logger"
 	"museum/pkg/postgres"
@@ -24,6 +21,7 @@ type autorizeHeader struct {
 	Token string `reqHeader:"Authorization"`
 }
 
+// Инициализация структуры для проверка аунтификации.
 func NewAuthAccess(db *postgres.Postgres, l *logger.Logger) *AuthAccess {
 	return &AuthAccess{
 		db: db,
@@ -31,7 +29,7 @@ func NewAuthAccess(db *postgres.Postgres, l *logger.Logger) *AuthAccess {
 	}
 }
 
-// Проверка аунтификации по jwt токену
+// Проверка аунтификации по jwt токену.
 func (a *AuthAccess) Аuthorized(ctx *fiber.Ctx) error {
 	headers := new(autorizeHeader)
 	if err := ctx.ReqHeaderParser(headers); err != nil {
@@ -63,16 +61,16 @@ func (a *AuthAccess) Аuthorized(ctx *fiber.Ctx) error {
 	return ctx.Next()
 }
 
-// Проверка на наличие роли админа
+// Проверка на наличие роли админа.
 func (a *AuthAccess) AdminAccess(ctx *fiber.Ctx) error {
 	var ok bool
-	user, ok := ctx.Locals("currentUser").(*users.User)
+	_, ok = ctx.Locals("currentUser").(*models.User)
 
 	if !ok {
 		return ctx.SendStatus(fiber.StatusForbidden)
 	}
 
-	ok = user.Query.IsAdmin()
+	ok = false
 	if !ok {
 		return ctx.SendStatus(fiber.StatusForbidden)
 	}
@@ -80,7 +78,7 @@ func (a *AuthAccess) AdminAccess(ctx *fiber.Ctx) error {
 	return ctx.Next()
 }
 
-// Парсинг токена
+// Парсинг токена.
 func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(utils.JwtSecretKey()), nil
@@ -92,7 +90,7 @@ func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 	return token, true
 }
 
-// Очистка лишнего из строки с токеном
+// Очистка лишнего из строки с токеном.
 func (a *AuthAccess) clearToken(authField string) string {
 	splited := strings.Split(authField, utils.JwtSeparateKey())
 	token := splited[len(splited)-1]
@@ -100,12 +98,12 @@ func (a *AuthAccess) clearToken(authField string) string {
 	return strings.TrimSpace(token)
 }
 
-// Поиск сщуестующего пользователя
-func (a *AuthAccess) existsUser(id int) (*users.User, bool) {
-	user, err := users.NewQuery().FindByID(id)
+// Поиск сщуестующего пользователя.
+func (a *AuthAccess) existsUser(_ int) (*models.User, bool) {
+	var err error
 	if err != nil {
 		return nil, false
 	}
 
-	return user, true
+	return nil, true
 }

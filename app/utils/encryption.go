@@ -3,10 +3,10 @@ package utils
 import (
 	"crypto/aes"
 	"encoding/base64"
-	"fmt"
+	"errors"
 )
 
-// Дешифрование данных
+// Дешифрование данных из url строки.
 func Decrypy(value string) (string, error) {
 	decode, err := base64.URLEncoding.DecodeString(value)
 	if err != nil {
@@ -15,7 +15,7 @@ func Decrypy(value string) (string, error) {
 
 	c, err := aes.NewCipher([]byte(secretKey()))
 	if err != nil {
-		fmt.Errorf("12")
+		return "", errors.New("12")
 	}
 
 	plain := make([]byte, len(decode))
@@ -24,7 +24,7 @@ func Decrypy(value string) (string, error) {
 	return string(plain), nil
 }
 
-// Шифрование данных
+// Шифрование строки для подставления в url строку.
 func Encrypt(value string) (string, error) {
 	c, err := aes.NewCipher([]byte(secretKey()))
 	if err != nil {

@@ -7,23 +7,30 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Генерация токена авторизации
+// Генерация токена авторизации.
 func GenerateToken(id, email string) (string, error) {
+	var twoDays time.Duration = 72
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    id,
 		"email": email,
-		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+		"exp":   time.Now().Add(time.Hour * twoDays).Unix(),
 	}).SignedString([]byte(JwtSecretKey()))
+
 	if err != nil {
 		return "", err
 	}
+
 	return token, nil
 }
 
 func JwtSecretKey() string {
-	return config.GetConf().HTTP.JwtSecretKey
+	cfg, _ := config.GetConf()
+
+	return cfg.HTTP.JwtSecretKey
 }
 
 func JwtSeparateKey() string {
-	return config.GetConf().HTTP.JwtSeparateKey
+	cfg, _ := config.GetConf()
+
+	return cfg.HTTP.JwtSeparateKey
 }

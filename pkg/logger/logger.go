@@ -22,8 +22,6 @@ type Logger struct {
 	Log *zerolog.Logger
 }
 
-var _globalLogger *Logger
-
 // New -.
 func New(level string) *Logger {
 	var l zerolog.Level
@@ -46,12 +44,7 @@ func New(level string) *Logger {
 	skipFrameCount := 3
 	logger := zerolog.New(os.Stdout).With().Timestamp().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + skipFrameCount).Logger()
 
-	_globalLogger = &Logger{Log: &logger}
-	return _globalLogger
-}
-
-func Log() *Logger {
-	return _globalLogger
+	return &Logger{Log: &logger}
 }
 
 // Debug -.
