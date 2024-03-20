@@ -1,15 +1,22 @@
 // Статистика по продажам билетов
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"museum/pkg/logger"
+	"museum/pkg/postgres"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type PostsRoutes struct {
-	layout string
+	db *postgres.Postgres
+	l  *logger.Logger
 }
 
-func NewPostsRoutes() *PostsRoutes {
+func NewPostsRoutes(db *postgres.Postgres, l *logger.Logger) *PostsRoutes {
 	return &PostsRoutes{
-		layout: "layouts/admin",
+		db: db,
+		l:  l,
 	}
 }
 
@@ -48,15 +55,7 @@ func (p *PostsRoutes) Update(ctx *fiber.Ctx) error {
 // @Success      200
 // @Router       /v1/admin/posts [get].
 func (p *PostsRoutes) Index(ctx *fiber.Ctx) error {
-	allPosts := []string{"123", "123", ""}
-
-	return ctx.Render(
-		"admin/posts/index",
-		fiber.Map{
-			"Posts": allPosts,
-		},
-		p.layout,
-	)
+	return ctx.SendStatus(fiber.StatusAccepted)
 }
 
 // Show godoc

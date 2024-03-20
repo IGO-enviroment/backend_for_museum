@@ -2,16 +2,21 @@
 package handlers
 
 import (
+	"museum/pkg/logger"
+	"museum/pkg/postgres"
+
 	"github.com/gofiber/fiber/v2"
 )
 
 type TopicRoutes struct {
-	layout string
+	db *postgres.Postgres
+	l  *logger.Logger
 }
 
-func NewTopicRoutes() *TopicRoutes {
+func NewTopicRoutes(db *postgres.Postgres, l *logger.Logger) *TopicRoutes {
 	return &TopicRoutes{
-		layout: "layouts/admin",
+		db: db,
+		l:  l,
 	}
 }
 
@@ -51,11 +56,9 @@ func (p *TopicRoutes) Update(ctx *fiber.Ctx) error {
 // @Router       /v1/admin/topics [get]
 func (p *TopicRoutes) Index(ctx *fiber.Ctx) error {
 	allTopics := []string{"123", "123", ""}
-	return ctx.Render(
-		"admin/topics/index",
+	return ctx.Status(fiber.StatusAccepted).JSON(
 		fiber.Map{
 			"Topics": allTopics,
 		},
-		p.layout,
 	)
 }

@@ -13,7 +13,7 @@ seeds:
 
 run: #swag-v1
 	go mod tidy && go mod download && \
-	DISABLE_SWAGGER_HTTP_HANDLER='' CGO_ENABLED=0 go run -tags migrate ./cmd
+	DISABLE_SWAGGER_HTTP_HANDLER='' CGO_ENABLED=0 go run -tags migrate ./cmd/web
 
 migrate-create:  ### create new migration
 	migrate create -ext sql -dir migrations '$(MIGRATE_NAME)'

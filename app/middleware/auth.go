@@ -36,7 +36,12 @@ func (a *AuthAccess) Аuthorized(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusUnauthorized)
 	}
 
-	token, ok := a.existsToken(a.clearToken(headers.Token))
+	strToken, ok := a.clearToken(headers.Token)
+	if !ok {
+		return ctx.SendStatus(fiber.StatusForbidden)
+	}
+
+	token, ok := a.existsToken(strToken)
 	if !ok {
 		return ctx.SendStatus(fiber.StatusForbidden)
 	}
@@ -83,6 +88,7 @@ func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(utils.JwtSecretKey()), nil
 	})
+
 	if err != nil || !token.Valid {
 		return token, false
 	}
@@ -91,11 +97,17 @@ func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 }
 
 // Очистка лишнего из строки с токеном.
-func (a *AuthAccess) clearToken(authField string) string {
+func (a *AuthAccess) clearToken(authField string) (string, bool) {
+	bearAndToken := 2
 	splited := strings.Split(authField, utils.JwtSeparateKey())
+
+	if len(splited) != bearAndToken {
+		return "", false
+	}
+
 	token := splited[len(splited)-1]
 
-	return strings.TrimSpace(token)
+	return strings.TrimSpace(token), true
 }
 
 // Поиск сщуестующего пользователя.
