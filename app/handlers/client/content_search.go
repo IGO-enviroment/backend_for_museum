@@ -30,7 +30,7 @@ func NewContentSearchRoutes(db *postgres.Postgres, l *logger.Logger) *ContentSea
 // @Tags         Клиент сторона
 // @Accept       json
 // @Produce      json
-// @Success    	 200 {object} client_entity.ResultContentSearch
+// @Success    	 200 {object} client_contract.ContentSearch
 // @Failure    	 422 {object} handlers.ErrorStruct
 // @Router       /v1/client/content/search [get].
 func (c *ContentSearchRoutes) Search(ctx *fiber.Ctx) error {

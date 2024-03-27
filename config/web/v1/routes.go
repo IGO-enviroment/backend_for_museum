@@ -43,6 +43,13 @@ func ClientRoutes(s *Server, v1 fiber.Router) {
 		popularFilters := client_handlers.NewPopularFiltersRoutes(s.db, s.l)
 		client.Get("/popular/filters", popularFilters.Index)
 	}
+
+	// Авторизация по почте
+	{
+		emailAuth := client_handlers.NewEmailAuthRoutes(s.db, s.l)
+		client.Post("/sign_in", emailAuth.Create)
+		client.Post("/auth", emailAuth.Verify)
+	}
 }
 
 // Админская часть.

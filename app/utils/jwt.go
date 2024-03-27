@@ -8,7 +8,7 @@ import (
 )
 
 // Генерация токена авторизации.
-func GenerateToken(id, email string) (string, error) {
+func GenerateToken(id int, email string) (string, error) {
 	var twoDays time.Duration = 72
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    id,

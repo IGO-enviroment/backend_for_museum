@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"museum/pkg/postgres"
+	"time"
+)
 
 // Мероприятия.
 type Event struct {
@@ -18,4 +21,8 @@ type Event struct {
 	TypeID int
 
 	CreatedAt *time.Time
+}
+
+type EventModel struct {
+	db *postgres.Postgres
 }
