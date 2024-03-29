@@ -11,8 +11,9 @@ import (
 )
 
 type EventsRepo struct {
-	db *postgres.Postgres
-	l  *logger.Logger
+	db          *postgres.Postgres
+	l           *logger.Logger
+	eventsQuery squirrel.SelectBuilder
 }
 
 func NewEventsRepo(db *postgres.Postgres, l *logger.Logger) *EventsRepo {
@@ -23,7 +24,7 @@ func NewEventsRepo(db *postgres.Postgres, l *logger.Logger) *EventsRepo {
 }
 
 func (e *EventsRepo) AllEvents() {
-	e.db.Builder.Select("id").From("events")
+	e.db.Builder.Select(e.selectFields()...).From("events")
 }
 
 func (e *EventsRepo) ByText(sql *squirrel.SelectBuilder) {
@@ -51,6 +52,14 @@ func (e *EventsRepo) WithPage(sql *squirrel.SelectBuilder, perPage int, offset i
 	return sql.Limit(uint64(perPage)).Offset(uint64(offset)).OrderBy("events.start_at ASC")
 }
 
+func (e *EventsRepo) WithArea(sql *squirrel.SelectBuilder) {
+	sql.InnerJoin("areas ON events.area_id=areas.id")
+}
+
+func (e *EventsRepo) WithType(sql *squirrel.SelectBuilder) {
+	sql.InnerJoin("type_events ON events.type_id=type_events.id")
+}
+
 // Запрос на получения данных по событиям.
 func (e *EventsRepo) GetValues(sql *squirrel.SelectBuilder) (pgx.Rows, bool) {
 	query, args, err := sql.ToSql()
@@ -66,4 +75,15 @@ func (e *EventsRepo) GetValues(sql *squirrel.SelectBuilder) (pgx.Rows, bool) {
 	}
 
 	return rows, true
+}
+
+// Поля для выбора.
+func (e *EventsRepo) selectFields() []string {
+	return []string{
+		"id", "title",
+		"ticket_count", "start_at",
+		"duration", "area_id",
+		"type_id", "preview_url",
+		"price", "created_at",
+	}
 }

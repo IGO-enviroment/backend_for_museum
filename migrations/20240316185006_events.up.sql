@@ -10,7 +10,11 @@ create table events (
 
     ticket_count INTEGER DEFAULT 0,          -- Общее количество доступных билетов
 
-    start_at TIMESTAMP NOT NULL,             -- Время начало 
+    start_at TIMESTAMP NOT NULL,             -- Время начало
+
+    preview_url TEXT,                        -- Ссылка на картинку превью
+
+    price DECIMAL(10,2),                     -- Цена билета
 
     duration INTEGER,                        -- Длительность в секундах
 
