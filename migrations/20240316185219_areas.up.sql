@@ -7,7 +7,7 @@ create table areas (
     named VARCHAR(255),         -- Название площадки
     property VARCHAR(255),      -- Описание
 
-    publish BOOLEAN DEFAULT 0,  -- Видна ли площадка всем польз.
+    publish BOOLEAN DEFAULT false,  -- Видна ли площадка всем польз.
 
     address_value VARCHAR(255), -- Адрес площадки
 

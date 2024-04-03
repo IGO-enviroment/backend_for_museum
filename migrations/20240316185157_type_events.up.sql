@@ -7,7 +7,7 @@ create table type_events (
     named VARCHAR(255),         -- Название типа мероприятия
     property VARCHAR(255),      -- Описание
 
-    publish BOOLEAN DEFAULT 0,  -- Виден ли тип всем польз.
+    publish BOOLEAN DEFAULT false,  -- Виден ли тип всем польз.
 
     -- Таймстамп
     created_at TIMESTAMP DEFAULT NOW()
