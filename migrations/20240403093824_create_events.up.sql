@@ -6,7 +6,7 @@ create table events (
 
     title VARCHAR(255),                     -- Название
 
-    publish BOOLEAN NOT NULL DEFAULT 0,      -- Опубликовано или нет событие
+    publish BOOLEAN NOT NULL DEFAULT false,      -- Опубликовано или нет событие
 
     ticket_count INTEGER DEFAULT 0,          -- Общее количество доступных билетов
 
@@ -18,8 +18,8 @@ create table events (
 
     duration INTEGER,                        -- Длительность в секундах
 
-    area_id SERIAL REFERENCES areas(area_id), -- На какой площадке проходит
-    type_id SERIAL REFERENCES types(type_id), -- На какой площадке проходит
+    area_id SERIAL REFERENCES areas, -- На какой площадке проходит
+    type_id SERIAL REFERENCES type_events, -- На какой площадке проходит
 
     -- Таймстамп
     created_at TIMESTAMP DEFAULT NOW()
