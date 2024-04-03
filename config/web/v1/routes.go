@@ -80,4 +80,11 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		topics.Get("/", topicsController.Index)
 		topics.Post("/", topicsController.Create)
 	}
+
+	// Типы мероприйтий
+	{
+		eventTypes := admin.Group("/event-types")
+		eventTypesController := admin_handlers.NewEventTypesRoutes(s.db, s.l)
+		eventTypes.Post("/create", eventTypesController.Create)
+	}
 }
