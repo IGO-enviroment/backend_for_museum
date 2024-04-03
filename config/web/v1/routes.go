@@ -1,11 +1,10 @@
 package v1
 
 import (
+	"github.com/gofiber/fiber/v2"
 	admin_handlers "museum/app/handlers/admin"
 	client_handlers "museum/app/handlers/client"
 	"museum/app/middleware"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 func SetRoutes(s *Server) {
