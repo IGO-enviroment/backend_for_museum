@@ -85,7 +85,7 @@ func (s *Server) dependency() {
 	if err != nil {
 		s.l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
-	defer s.db.Close()
+	//defer s.db.Close()
 
 	// Подключение отоложенных задач
 	// queueCli, err = queue.New("")

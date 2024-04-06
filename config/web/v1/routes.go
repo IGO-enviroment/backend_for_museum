@@ -3,6 +3,7 @@ package v1
 import (
 	admin_handlers "museum/app/handlers/admin"
 	client_handlers "museum/app/handlers/client"
+	test_handlers "museum/app/handlers/test"
 	"museum/app/middleware"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,6 +14,7 @@ func SetRoutes(s *Server) {
 
 	ClientRoutes(s, v1)
 	AdminsRoutes(s, v1)
+	TestRoutes(s, v1)
 }
 
 // Сторона пользователя.
@@ -79,5 +81,17 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		topics.Put("/update/:id", topicsController.Update)
 		topics.Get("/", topicsController.Index)
 		topics.Post("/", topicsController.Create)
+	}
+}
+
+// Тестовые эндпоинты.
+func TestRoutes(s *Server, v1 fiber.Router) {
+	testGroup := v1.Group("/test")
+	// Тест текствого редактора
+	{
+		testController := test_handlers.NewTestTextEditorRoutes(s.db, s.l)
+		testGroup.Post("/create", testController.Create)
+		testGroup.Get("/text/:id", testController.Get)
+		testGroup.Put("/text/:id", testController.Update)
 	}
 }
