@@ -23,6 +23,10 @@ func NewEventsRepo(db *postgres.Postgres, l *logger.Logger) *EventsRepo {
 	}
 }
 
+func (e *EventsRepo) Init() squirrel.SelectBuilder {
+	return e.db.Builder.Select(e.selectFields()...)
+}
+
 func (e *EventsRepo) AllEvents() {
 	e.db.Builder.Select(e.selectFields()...).From("events")
 }
@@ -38,21 +42,18 @@ func (e *EventsRepo) WithTickets(countTicket int, sql *squirrel.SelectBuilder) s
 	return sql.Where(squirrel.Eq{"ticket_count": countTicket})
 }
 
-func (e *EventsRepo) WithArea(areaIds []int, sql *squirrel.SelectBuilder) {
-	sql.InnerJoin("areas ON events.area_id=areas.id", squirrel.Eq{"areas.id": areaIds})
+func (e *EventsRepo) WithArea(areaIds []int, sql *squirrel.SelectBuilder) squirrel.SelectBuilder {
+	return sql.InnerJoin("areas ON events.area_id=areas.id", squirrel.Eq{"areas.id": areaIds})
 }
 
-func (e *EventsRepo) WithType(typeIds []int, sql *squirrel.SelectBuilder) {
-	sql.InnerJoin("type_events ON events.type_id=type_events.id", squirrel.Eq{"type_events.id": typeIds})
+func (e *EventsRepo) WithType(typeIds []int, sql *squirrel.SelectBuilder) squirrel.SelectBuilder {
+	return sql.InnerJoin("type_events ON events.type_id=type_events.id", squirrel.Eq{"type_events.id": typeIds})
 }
 
-func (e *EventsRepo) WithTags(tagIds []int, sql *squirrel.SelectBuilder) {
-	sql.LeftJoin(
-		"event_tags ON event_tags.event_id = events.id",
-		squirrel.Eq{"event_tags.id": tagIds},
-	).LeftJoin(
-		"tags ON event_tags.tag_id = tags.id",
-	)
+func (e *EventsRepo) WithTags(tagIds []int, sql *squirrel.SelectBuilder) squirrel.SelectBuilder {
+	tagsSql := e.db.Builder.Select("event_id").From("event_tags").Where(squirrel.Eq{"event_tags.tag_id": tagIds})
+
+	return sql.Where(tagsSql.Prefix("events.id IN (").Suffix(")"))
 }
 
 func (e *EventsRepo) WithPage(sql *squirrel.SelectBuilder, perPage, offset int) squirrel.SelectBuilder {
