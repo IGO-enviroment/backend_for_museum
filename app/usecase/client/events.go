@@ -4,7 +4,12 @@ import (
 	"fmt"
 	entity_client "museum/app/entity/client"
 	repo_client "museum/app/repo/client"
+
+	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4"
 )
+
+const perPage = 10
 
 type EventsCase struct {
 	repo   *repo_client.EventsRepo
@@ -18,8 +23,9 @@ func NewEventsCase(repo *repo_client.EventsRepo, entity *entity_client.EventsEnt
 	}
 }
 
-func (e *EventsCase) Filter() {
-	sql := e.repo.Init()
+func (e *EventsCase) FilterEvents() {
+	var sql squirrel.StatementBuilderType
+
 	if e.entity.Tags != nil && len(e.entity.Tags) > 0 {
 		sql = e.repo.WithTags(e.entity.Tags, &sql)
 	}
@@ -32,7 +38,31 @@ func (e *EventsCase) Filter() {
 		sql = e.repo.WithArea(e.entity.Areas, &sql)
 	}
 
-	sql = e.repo.WithPage(&sql, 1, 1)
-	rows, _ := e.repo.GetValues(&sql)
-	fmt.Println(rows)
+	sql = e.repo.ByTicketData(
+		repo_client.OptionsTicketFilter{
+			Price:       e.entity.Price,
+			Count:       e.entity.TicketCount,
+			TypesTicket: e.entity.TypeTicket,
+		},
+		sql,
+	)
+
+	countRows, ok := e.repo.Count(&sql)
+	fmt.Println(countRows)
+	fmt.Println(ok)
+	e.EventRows(sql)
+}
+
+func (e *EventsCase) EventRows(sql squirrel.StatementBuilderType) (pgx.Rows, bool) {
+	var query squirrel.SelectBuilder
+
+	selectQuery := e.repo.AllEvents(&sql)
+
+	if e.entity.Page == nil {
+		query = e.repo.WithPage(&selectQuery, perPage, 1)
+	} else {
+		query = e.repo.WithPage(&selectQuery, perPage, *e.entity.Page)
+	}
+
+	return e.repo.GetValues(&query)
 }

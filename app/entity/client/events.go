@@ -13,15 +13,16 @@ type DateForEvent struct {
 }
 
 type EventsEntity struct {
-	Text     TextForEvent
-	Date     DateForEvent
-	Tags     []int
-	Areas    []int
-	Types    []int
-	Duration int
-	Tickets  int
-	Price    int
-	Page     int
+	Text        TextForEvent
+	Date        DateForEvent
+	Tags        []int
+	Areas       []int
+	Types       []int
+	Duration    int
+	TypeTicket  []string
+	TicketCount []string
+	Price       []string
+	Page        *int `json:"page,omitempty"`
 }
 
 type SelectValue struct {
