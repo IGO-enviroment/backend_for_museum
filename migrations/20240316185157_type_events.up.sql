@@ -4,13 +4,14 @@ BEGIN;
 create table type_events (
     id SERIAL PRIMARY KEY,      -- Уникальный ID
 
-    named VARCHAR(255),         -- Название типа мероприятия
-    property VARCHAR(255),      -- Описание
+    name VARCHAR(255),         -- Название типа мероприятия
+    description VARCHAR(255),      -- Описание
 
     publish BOOLEAN DEFAULT false,  -- Виден ли тип всем польз.
 
     -- Таймстамп
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP
 );
 
 COMMIT;

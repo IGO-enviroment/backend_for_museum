@@ -10,11 +10,13 @@ import (
 )
 
 type Seeds struct {
-	cfg     *config.Config
-	db      *postgres.Postgres
-	typeIds []int
-	tagIds  []int
-	areaIds []int
+	cfg          *config.Config
+	db           *postgres.Postgres
+	typeIds      []int
+	tagIds       []int
+	areaIds      []int
+	eventsIds    []int
+	eventTypeIds []int
 }
 
 func NewSeeds(cfg *config.Config) *Seeds {
@@ -26,83 +28,92 @@ func NewSeeds(cfg *config.Config) *Seeds {
 // Запуск создания сидов.
 func (s *Seeds) Run() {
 	s.initDependency()
-	// s.CreateTypeEvents()
-	// s.CreateTags()
-	// s.CreateAreas()
+	s.CreateTags()
+	s.CreateAreas()
+	s.CreateTypeEvents()
 	s.CreateEvents()
+	s.CreateEventTags()
 }
 
 func (s *Seeds) CreateTypeEvents() {
+	var id int
 	var sql string
 	var args []interface{}
 	var err error
 
-	for _, typeEvent := range TypeEventsNames() {
-		sql, args, err = s.db.Builder.Insert("type_events").Columns("named", "property", "publish").Values(
-			typeEvent, RandStringBytes(200), true,
-		).ToSql()
+	for _, data := range TypeEventsData() {
+		sql, args, err = s.db.Builder.Insert("type_events").Columns(
+			"name", "description", "publish", "created_at", "updated_at",
+		).Values(
+			data...,
+		).Suffix("RETURNING \"id\"").ToSql()
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
 
-		_, err = s.db.Pool.Exec(context.Background(), sql, args...)
+		err = s.db.Pool.QueryRow(context.Background(), sql, args...).Scan(&id)
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
+		s.typeIds = append(s.typeIds, id)
 	}
 }
 
 func (s *Seeds) CreateTags() {
+	var id int
 	var sql string
 	var args []interface{}
 	var err error
 
-	for _, tag := range TagsNames() {
-		sql, args, err = s.db.Builder.Insert("tags").Columns("named", "property").Values(
-			tag, RandStringBytes(200),
-		).ToSql()
+	for _, data := range TagsData() {
+		sql, args, err = s.db.Builder.Insert("tags").Columns(
+			"name", "description", "group_name", "created_at", "updated_at",
+		).Values(
+			data...,
+		).Suffix("RETURNING \"id\"").ToSql()
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
 
-		_, err = s.db.Pool.Exec(context.Background(), sql, args...)
+		err = s.db.Pool.QueryRow(context.Background(), sql, args...).Scan(&id)
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
+		s.tagIds = append(s.tagIds, id)
 	}
 }
 
 func (s *Seeds) CreateAreas() {
+	var id int
 	var sql string
 	var args []interface{}
 	var err error
 
-	for _, tag := range AreasNames() {
+	for _, data := range AreasData() {
 		sql, args, err = s.db.Builder.Insert("areas").Columns(
-			"named", "property", "publish", "address_value",
+			"name", "description", "publish", "address_value", "created_at", "updated_at",
 		).Values(
-			tag, RandStringBytes(200), true, "address_value",
-		).ToSql()
+			data...,
+		).Suffix("RETURNING \"id\"").ToSql()
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
 
-		_, err = s.db.Pool.Exec(context.Background(), sql, args...)
+		err = s.db.Pool.QueryRow(context.Background(), sql, args...).Scan(&id)
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
+		s.areaIds = append(s.areaIds, id)
 	}
 }
 
 func (s *Seeds) CreateEvents() {
+	var id int
 	var sql string
 	var args []interface{}
 	var err error
 
 	for _, eventData := range EventsData() {
-		areaID := s.LastID("areas")
-		typeID := s.LastID("type_events")
-
 		sql, args, err = s.db.Builder.Insert("events").Columns(
 			"title", "publish", "ticket_count",
 			"start_at", "duration", "price", "area_id", "type_id",
@@ -113,26 +124,49 @@ func (s *Seeds) CreateEvents() {
 			eventData.StartAt,
 			eventData.Duration,
 			eventData.Price,
-			rand.Intn(areaID-1)+1,
-			rand.Intn(typeID-1)+1,
-		).ToSql()
+			s.randId(s.areaIds),
+			s.randId(s.typeIds),
+		).Suffix("RETURNING \"id\"").ToSql()
 
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
 
-		_, err = s.db.Pool.Exec(context.Background(), sql, args...)
+		err = s.db.Pool.QueryRow(context.Background(), sql, args...).Scan(&id)
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
+		s.eventsIds = append(s.eventsIds, id)
+	}
+}
+
+func (s *Seeds) CreateEventTags() {
+	var id int
+	var sql string
+	var args []interface{}
+	var err error
+
+	for _, eventId := range s.eventsIds {
+		sql, args, err = s.db.Builder.Insert("event_tags").Columns(
+			"event_id", "tag_id",
+		).Values(
+			eventId,
+			s.randId(s.tagIds),
+		).Suffix("RETURNING \"id\"").ToSql()
+
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+
+		err = s.db.Pool.QueryRow(context.Background(), sql, args...).Scan(&id)
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+		s.eventTypeIds = append(s.eventTypeIds, id)
 	}
 }
 
 func (s *Seeds) CreateContent(id int) {
-
-}
-
-func (s *Seeds) CreateEventTags(id int) {
 
 }
 
@@ -170,22 +204,6 @@ func (s *Seeds) CreateRoles() {
 	}
 }
 
-func (s *Seeds) LastID(tableName string) int {
-	var id int
-
-	sql, args, err := s.db.Builder.Select("MAX(id)").From(tableName).ToSql()
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-
-	err = s.db.Pool.QueryRow(context.Background(), sql, args...).Scan(id)
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-
-	return id
-}
-
 func (s *Seeds) initDependency() {
 	var err error
 
@@ -194,4 +212,8 @@ func (s *Seeds) initDependency() {
 	if err != nil {
 		log.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
+}
+
+func (s *Seeds) randId(data []int) int {
+	return data[rand.Intn(len(data))]
 }

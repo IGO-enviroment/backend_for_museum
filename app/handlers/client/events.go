@@ -3,6 +3,9 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 
+	client_entity "museum/app/entity/client"
+	client_repo "museum/app/repo/client"
+	client_usecase "museum/app/usecase/client"
 	"museum/pkg/logger"
 	"museum/pkg/postgres"
 )
@@ -24,5 +27,12 @@ func (f *ClientEventsRoutes) Index(ctx *fiber.Ctx) error {
 }
 
 func (f *ClientEventsRoutes) Filter(ctx *fiber.Ctx) error {
-	return ctx.SendStatus(fiber.StatusAccepted)
+	f.l.Info("NewEventsRepo")
+	repo := client_repo.NewEventsRepo(f.db, f.l)
+	entity := &client_entity.EventsEntity{}
+	f.l.Info("EventsEntity")
+	usecase := client_usecase.NewEventsCase(repo, entity)
+	f.l.Info("NewEventsCase")
+	result := usecase.Call()
+	return ctx.Status(fiber.StatusAccepted).JSON(result)
 }

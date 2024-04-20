@@ -8,7 +8,7 @@ swag-v1: ### swag init
 	swag init -g config/web/v1/routes.go --parseDependency
 
 seeds:
-	go mod tidy && go mod download \
+	go mod tidy && go mod download && \
 	go run -tags migrate ./cmd/seeds
 
 run: #swag-v1

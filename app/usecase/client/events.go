@@ -12,19 +12,24 @@ import (
 const perPage = 10
 
 type EventsCase struct {
-	repo   *repo_client.EventsRepo
-	entity *entity_client.EventsEntity
+	repo     *repo_client.EventsRepo
+	entity   *entity_client.EventsEntity
+	response entity_client.EventsResponse
 }
 
 func NewEventsCase(repo *repo_client.EventsRepo, entity *entity_client.EventsEntity) *EventsCase {
 	return &EventsCase{
-		repo:   repo,
-		entity: entity,
+		repo:     repo,
+		entity:   entity,
+		response: entity_client.EventsResponse{},
 	}
 }
 
-func (e *EventsCase) FilterEvents() {
-	var sql squirrel.StatementBuilderType
+func (e *EventsCase) Call() entity_client.EventsResponse {
+	var countRows int
+	var ok bool
+
+	sql := e.repo.Init()
 
 	if e.entity.Tags != nil && len(e.entity.Tags) > 0 {
 		sql = e.repo.WithTags(e.entity.Tags, &sql)
@@ -47,13 +52,32 @@ func (e *EventsCase) FilterEvents() {
 		sql,
 	)
 
-	countRows, ok := e.repo.Count(&sql)
+	e.repo.Log.Info("Count")
+
+	countRows, ok = e.repo.CountValues(&sql)
+
+	e.repo.Log.Info("Count")
+
 	fmt.Println(countRows)
 	fmt.Println(ok)
-	e.EventRows(sql)
+	rows, _ := e.eventRows(sql)
+	for rows.Next() {
+		var fff entity_client.EventItem
+
+		err := rows.Scan(&fff)
+		if err != nil {
+			e.repo.Log.Info(err.Error())
+		}
+
+		e.repo.Log.Info(fmt.Sprintf("%#v", fff))
+	}
+
+	e.repo.Log.Info("response")
+
+	return e.response
 }
 
-func (e *EventsCase) EventRows(sql squirrel.StatementBuilderType) (pgx.Rows, bool) {
+func (e *EventsCase) eventRows(sql squirrel.StatementBuilderType) (pgx.Rows, bool) {
 	var query squirrel.SelectBuilder
 
 	selectQuery := e.repo.AllEvents(&sql)

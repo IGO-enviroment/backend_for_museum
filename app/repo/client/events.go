@@ -18,19 +18,19 @@ type OptionsTicketFilter struct {
 
 type EventsRepo struct {
 	db          *postgres.Postgres
-	l           *logger.Logger
+	Log         *logger.Logger
 	eventsQuery squirrel.SelectBuilder
 }
 
 func NewEventsRepo(db *postgres.Postgres, l *logger.Logger) *EventsRepo {
 	return &EventsRepo{
-		db: db,
-		l:  l,
+		db:  db,
+		Log: l,
 	}
 }
 
-func (e *EventsRepo) Init() squirrel.SelectBuilder {
-	return e.db.Builder.Select(e.selectFields()...)
+func (e *EventsRepo) Init() squirrel.StatementBuilderType {
+	return e.db.Builder.Where("0 != 1")
 }
 
 func (e *EventsRepo) AllEvents(sql *squirrel.StatementBuilderType) squirrel.SelectBuilder {
@@ -119,39 +119,34 @@ func (e *EventsRepo) WithPage(sql *squirrel.SelectBuilder, perPage, offset int) 
 	return sql.Limit(uint64(perPage)).Offset(uint64(offset)).OrderBy("events.start_at ASC")
 }
 
-func (e *EventsRepo) Count(sql *squirrel.StatementBuilderType) (int, bool) {
-	var count int
+func (e *EventsRepo) CountValues(sql *squirrel.StatementBuilderType) (int, bool) {
+	var query string
+	var args []interface{}
+	var err error
 
-	query, args, err := sql.Select("COUNT(id)").From("events").ToSql()
+	query, args, err = sql.Select("COUNT(id)").From("events").ToSql()
 
 	if err != nil {
-		e.l.Error(err)
+		e.Log.Error(err)
 
 		return 0, false
 	}
 
-	err = e.db.Pool.QueryRow(context.Background(), query, args...).Scan(&count)
-	if err != nil {
-		e.l.Error(err)
-
-		return 0, false
-	}
-
-	return count, true
+	return e.queryCount(query, args)
 }
 
 // Запрос на получения данных по событиям.
 func (e *EventsRepo) GetValues(sql *squirrel.SelectBuilder) (pgx.Rows, bool) {
 	query, args, err := sql.ToSql()
 	if err != nil {
-		e.l.Error(err)
+		e.Log.Error(err)
 
 		return nil, false
 	}
 
 	rows, err := e.db.Pool.Query(context.Background(), query, args...)
 	if err != nil {
-		e.l.Error(err)
+		e.Log.Error(err)
 
 		return nil, false
 	}
@@ -167,4 +162,18 @@ func (e *EventsRepo) selectFields() []string {
 		"events.type_id", "events.preview_url", "events.created_at",
 		"count(*) OVER() AS fullCount",
 	}
+}
+
+func (e *EventsRepo) queryCount(query string, args []interface{}) (int, bool) {
+	var err error
+	var count int
+
+	err = e.db.Pool.QueryRow(context.Background(), query, args...).Scan(&count)
+	if err != nil {
+		e.Log.Error(err)
+
+		return 0, false
+	}
+
+	return count, true
 }

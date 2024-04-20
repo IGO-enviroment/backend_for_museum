@@ -46,13 +46,13 @@ type FilterItem struct {
 }
 
 type EventItem struct {
-	Name         string   `json:"name"`
-	Date         string   `json:"date"`
-	Area         string   `json:"area"`
-	Type         string   `json:"type"`
-	Duration     string   `json:"duration"`
+	Name         string   `json:"name" db:"name"`
+	Date         string   `json:"date" db:"start_at"`
+	Area         string   `json:"area" db:"area_id"`
+	Type         string   `json:"type" db:"type_id"`
+	Duration     string   `json:"duration" db:"duration"`
 	TicketsCount int      `json:"ticketsCount"`
-	PreviewUrl   string   `json:"previewUrl"`
+	PreviewUrl   string   `json:"previewUrl" db:"preview_url"`
 	Price        string   `json:"price"`
 	Tags         []string `json:"tags"`
 }
