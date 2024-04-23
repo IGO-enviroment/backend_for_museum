@@ -17,24 +17,17 @@ type OptionsTicketFilter struct {
 }
 
 type EventsRepo struct {
-	db          *postgres.Postgres
-	Log         *logger.Logger
-	eventsQuery squirrel.SelectBuilder
+	db    *postgres.Postgres
+	Log   *logger.Logger
+	Query squirrel.StatementBuilderType
 }
 
 func NewEventsRepo(db *postgres.Postgres, l *logger.Logger) *EventsRepo {
 	return &EventsRepo{
-		db:  db,
-		Log: l,
+		db:    db,
+		Log:   l,
+		Query: db.Builder,
 	}
-}
-
-func (e *EventsRepo) Init() squirrel.StatementBuilderType {
-	return e.db.Builder.Where("0 != 1")
-}
-
-func (e *EventsRepo) AllEvents(sql *squirrel.StatementBuilderType) squirrel.SelectBuilder {
-	return sql.Select(e.selectFields()...).From("events")
 }
 
 func (e *EventsRepo) ByText(sql *squirrel.SelectBuilder) {
@@ -44,27 +37,22 @@ func (e *EventsRepo) RangeDate(start time.Time, end time.Time, sql *squirrel.Sel
 	sql.Where("start")
 }
 
-func (e *EventsRepo) WithTickets(countTicket int, sql *squirrel.StatementBuilderType) squirrel.StatementBuilderType {
-	return sql.Where(squirrel.Eq{"ticket_count": countTicket})
+func (e *EventsRepo) WithArea(areaIds []int) {
+	e.Query = e.Query.Where(squirrel.Eq{"events.area_id": areaIds})
 }
 
-func (e *EventsRepo) WithArea(areaIds []int, sql *squirrel.StatementBuilderType) squirrel.StatementBuilderType {
-	return sql.Where(squirrel.Eq{"events.area_id": areaIds})
+func (e *EventsRepo) WithType(typeIds []int) {
+	e.Query = e.Query.Where(squirrel.Eq{"events.type_id": typeIds})
 }
 
-func (e *EventsRepo) WithType(typeIds []int, sql *squirrel.StatementBuilderType) squirrel.StatementBuilderType {
-	return sql.Where(squirrel.Eq{"events.type_id": typeIds})
-}
-
-func (e *EventsRepo) WithTags(tagIds []int, sql *squirrel.StatementBuilderType) squirrel.StatementBuilderType {
+func (e *EventsRepo) WithTags(tagIds []int) {
 	tagsSql := e.db.Builder.Select("event_id").From("event_tags").Where(squirrel.Eq{"event_tags.tag_id": tagIds})
-
-	return sql.Where(tagsSql.Prefix("events.id IN (").Suffix(")"))
+	e.Query = e.Query.Where(tagsSql.Prefix("events.id IN (").Suffix(")"))
 }
 
-func (e *EventsRepo) ByTicketData(options OptionsTicketFilter, sql squirrel.StatementBuilderType) squirrel.StatementBuilderType {
+func (e *EventsRepo) ByTicketData(options OptionsTicketFilter) {
 	if len(options.TypesTicket) == 0 && len(options.Count) == 0 && len(options.Price) == 0 {
-		return sql
+		return
 	}
 
 	var ticketSql squirrel.SelectBuilder
@@ -87,11 +75,10 @@ func (e *EventsRepo) ByTicketData(options OptionsTicketFilter, sql squirrel.Stat
 		used = true
 	}
 
-	if used {
-		sql.Where(ticketSql.Prefix("events.id IN (").Suffix(")"))
+	if !used {
+		return
 	}
-
-	return sql
+	e.Query = e.Query.Where(ticketSql.Prefix("events.id IN (").Suffix(")"))
 }
 
 func (e *EventsRepo) WithRangeValues(values []string, column string, sql squirrel.SelectBuilder) squirrel.SelectBuilder {
@@ -115,16 +102,12 @@ func (e *EventsRepo) WithRangeValues(values []string, column string, sql squirre
 	return sql
 }
 
-func (e *EventsRepo) WithPage(sql *squirrel.SelectBuilder, perPage, offset int) squirrel.SelectBuilder {
-	return sql.Limit(uint64(perPage)).Offset(uint64(offset)).OrderBy("events.start_at ASC")
-}
-
-func (e *EventsRepo) CountValues(sql *squirrel.StatementBuilderType) (int, bool) {
+func (e *EventsRepo) CountValues() (int, bool) {
 	var query string
 	var args []interface{}
 	var err error
 
-	query, args, err = sql.Select("COUNT(id)").From("events").ToSql()
+	query, args, err = e.Query.Select("COUNT(id)").From("events").ToSql()
 
 	if err != nil {
 		e.Log.Error(err)
@@ -136,8 +119,10 @@ func (e *EventsRepo) CountValues(sql *squirrel.StatementBuilderType) (int, bool)
 }
 
 // Запрос на получения данных по событиям.
-func (e *EventsRepo) GetValues(sql *squirrel.SelectBuilder) (pgx.Rows, bool) {
-	query, args, err := sql.ToSql()
+func (e *EventsRepo) GetValues(perPage, offset int) (pgx.Rows, bool) {
+	query, args, err := e.withPage(
+		e.Query.Select(e.selectFields()...).From("events"), perPage, offset,
+	).ToSql()
 	if err != nil {
 		e.Log.Error(err)
 
@@ -160,10 +145,15 @@ func (e *EventsRepo) selectFields() []string {
 		"events.id", "events.title", "events.start_at",
 		"events.duration", "events.area_id",
 		"events.type_id", "events.preview_url", "events.created_at",
-		"count(*) OVER() AS fullCount",
 	}
 }
 
+// Пагинация
+func (e *EventsRepo) withPage(sql squirrel.SelectBuilder, perPage, offset int) squirrel.SelectBuilder {
+	return sql.Limit(uint64(perPage)).Offset(uint64(offset)).OrderBy("events.start_at ASC")
+}
+
+// Запрос на количество записей
 func (e *EventsRepo) queryCount(query string, args []interface{}) (int, bool) {
 	var err error
 	var count int

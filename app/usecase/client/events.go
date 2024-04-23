@@ -5,7 +5,6 @@ import (
 	entity_client "museum/app/entity/client"
 	repo_client "museum/app/repo/client"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -29,38 +28,63 @@ func (e *EventsCase) Call() entity_client.EventsResponse {
 	var countRows int
 	var ok bool
 
-	sql := e.repo.Init()
-
 	if e.entity.Tags != nil && len(e.entity.Tags) > 0 {
-		sql = e.repo.WithTags(e.entity.Tags, &sql)
+		e.repo.WithTags(e.entity.Tags)
 	}
 
 	if e.entity.Types != nil && len(e.entity.Types) > 0 {
-		sql = e.repo.WithType(e.entity.Types, &sql)
+		e.repo.WithType(e.entity.Types)
 	}
 
 	if e.entity.Areas != nil && len(e.entity.Areas) > 0 {
-		sql = e.repo.WithArea(e.entity.Areas, &sql)
+		e.repo.WithArea(e.entity.Areas)
 	}
 
-	sql = e.repo.ByTicketData(
+	e.repo.ByTicketData(
 		repo_client.OptionsTicketFilter{
 			Price:       e.entity.Price,
 			Count:       e.entity.TicketCount,
 			TypesTicket: e.entity.TypeTicket,
 		},
-		sql,
 	)
 
 	e.repo.Log.Info("Count")
 
-	countRows, ok = e.repo.CountValues(&sql)
+	countRows, ok = e.repo.CountValues()
+	if !ok {
+		return e.response
+	}
 
-	e.repo.Log.Info("Count")
+	e.setPageData(countRows)
 
 	fmt.Println(countRows)
 	fmt.Println(ok)
-	rows, _ := e.eventRows(sql)
+	rows, ok := e.eventRows()
+	if !ok {
+		return e.response
+	}
+
+	e.setData(rows)
+
+	e.repo.Log.Info("response")
+
+	return e.response
+}
+
+func (e *EventsCase) eventRows() (pgx.Rows, bool) {
+	if e.entity.Page == nil {
+		return e.repo.GetValues(perPage, 1)
+	}
+
+	return e.repo.GetValues(perPage, *e.entity.Page)
+}
+
+func (e *EventsCase) setPageData(countRows int) {
+	e.response.Page.Total = countRows
+	e.response.Page.Current = 1
+}
+
+func (e *EventsCase) setData(rows pgx.Rows) {
 	for rows.Next() {
 		var fff entity_client.EventItem
 
@@ -71,22 +95,4 @@ func (e *EventsCase) Call() entity_client.EventsResponse {
 
 		e.repo.Log.Info(fmt.Sprintf("%#v", fff))
 	}
-
-	e.repo.Log.Info("response")
-
-	return e.response
-}
-
-func (e *EventsCase) eventRows(sql squirrel.StatementBuilderType) (pgx.Rows, bool) {
-	var query squirrel.SelectBuilder
-
-	selectQuery := e.repo.AllEvents(&sql)
-
-	if e.entity.Page == nil {
-		query = e.repo.WithPage(&selectQuery, perPage, 1)
-	} else {
-		query = e.repo.WithPage(&selectQuery, perPage, *e.entity.Page)
-	}
-
-	return e.repo.GetValues(&query)
 }

@@ -58,8 +58,8 @@ type EventItem struct {
 }
 
 type PagePagination struct {
-	Total   string `json:"total"`
-	Current string `json:"current"`
+	Total   int `json:"total"`
+	Current int `json:"current"`
 }
 
 // Ответ по страницы фильтрации
