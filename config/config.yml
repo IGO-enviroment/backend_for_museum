@@ -14,7 +14,7 @@ logger:
 
 postgres:
   pool_max: 2
-  url: "postgres://postgres:123@localhost:5432/museum"
+  url: "postgres://user:pass@localhost:5432/postgres"
 
 redis:
   url: ""
