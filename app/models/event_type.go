@@ -3,10 +3,11 @@ package models
 import "time"
 
 // Все типы событий в музее.
-type TypeEvent struct {
+type EventType struct {
 	ID          int
 	Name        string
 	Description string
-	Publish     bool
+	IsVisible   bool
 	CreatedAt   *time.Time
+	UpdatedAt   *time.Time
 }
