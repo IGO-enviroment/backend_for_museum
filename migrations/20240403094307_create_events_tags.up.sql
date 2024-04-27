@@ -8,7 +8,8 @@ create table event_tags (
     tag_id SERIAL REFERENCES tags,          -- С каким тегом есть связь
 
     -- Таймстамп
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP
 );
 
 COMMIT;

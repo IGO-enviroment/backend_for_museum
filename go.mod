@@ -12,6 +12,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/rs/zerolog v1.32.0
+	github.com/shopspring/decimal v1.2.0
 	github.com/swaggo/swag v1.16.3
 	golang.org/x/text v0.14.0
 )

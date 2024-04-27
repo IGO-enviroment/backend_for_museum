@@ -22,7 +22,8 @@ create table events (
     type_id SERIAL REFERENCES type_events, -- На какой площадке проходит
 
     -- Таймстамп
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP
 );
 
 COMMIT;
