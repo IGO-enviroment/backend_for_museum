@@ -83,6 +83,23 @@ func (a *AuthAccess) AdminAccess(ctx *fiber.Ctx) error {
 	return ctx.Next()
 }
 
+// Проверка на наличие роли супер админа.
+func (a *AuthAccess) SuperAdminAccess(ctx *fiber.Ctx) error {
+	var ok bool
+	_, ok = ctx.Locals("currentUser").(*models.User)
+
+	if !ok {
+		return ctx.SendStatus(fiber.StatusForbidden)
+	}
+
+	ok = false
+	if !ok {
+		return ctx.SendStatus(fiber.StatusForbidden)
+	}
+
+	return ctx.Next()
+}
+
 // Парсинг токена.
 func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {

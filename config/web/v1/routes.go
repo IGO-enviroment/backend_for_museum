@@ -60,6 +60,26 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		authPermissions.Аuthorized, authPermissions.AdminAccess,
 	)
 
+	superAdmin := v1.Group(
+		"/admin",
+		authPermissions.Аuthorized, authPermissions.SuperAdminAccess,
+	)
+
+	auth := v1.Group("/auth")
+
+	// Авторизация
+	{
+		authController := admin_handlers.NewAuthRoutes(s.db, s.l)
+
+		// Супер админ
+		register := superAdmin.Group("/register")
+		register.Post("/", authController.AddUser)
+
+		// Админ
+		token := auth.Group("/token")
+		token.Post("/generate", authController.GetToken)
+	}
+
 	// Работа с постами
 	{
 		posts := admin.Group("/posts")

@@ -61,7 +61,7 @@ func (e *EmailAuthRoutes) Verify(ctx *fiber.Ctx) error {
 		return handlers.ErrorResponse(ctx)
 	}
 
-	token, err := utils.GenerateToken(2, "email")
+	token, err := utils.GenerateToken(2, "email", "user")
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
