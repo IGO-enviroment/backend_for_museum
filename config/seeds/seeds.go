@@ -43,7 +43,7 @@ func (s *Seeds) CreateTypeEvents() {
 
 	for _, data := range TypeEventsData() {
 		sql, args, err = s.db.Builder.Insert("type_events").Columns(
-			"name", "description", "publish", "created_at", "updated_at",
+			"name", "description", "is_visible", "created_at", "updated_at",
 		).Values(
 			data...,
 		).Suffix("RETURNING \"id\"").ToSql()
