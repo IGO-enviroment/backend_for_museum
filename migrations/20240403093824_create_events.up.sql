@@ -6,7 +6,9 @@ create table events (
 
     title VARCHAR(255),                     -- Название
 
-    publish BOOLEAN NOT NULL DEFAULT false,      -- Опубликовано или нет событие
+    description TEXT,                       -- Описание
+
+    publish BOOLEAN NOT NULL DEFAULT false,  -- Опубликовано или нет событие
 
     ticket_count INTEGER DEFAULT 0,          -- Общее количество доступных билетов
 

@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	contract_admin "museum/app/contract/admin"
 	entity_admin "museum/app/entity/admin"
+	"museum/app/handlers"
 	repo_admin "museum/app/repo/admin"
 	usecase_admin "museum/app/usecase/admin"
 	"museum/pkg/logger"
@@ -24,14 +26,39 @@ func NewEventsRoutes(db *postgres.Postgres, l *logger.Logger) *EventsRoutes {
 
 // Create godoc
 func (e *EventsRoutes) Create(ctx *fiber.Ctx) error {
-	return ctx.SendStatus(fiber.StatusCreated)
+	var request contract_admin.CreateEvent
+	if err := ctx.BodyParser(&request); err != nil {
+		e.l.Error(err)
+
+		return handlers.ErrorResponse(ctx)
+	}
+
+	repo := repo_admin.NewCreateEventRepo(e.db, e.l)
+	usecase := usecase_admin.NewCreateEventCase(
+		&repo,
+		&entity_admin.CreateEventEntity{
+			Title:       request.Title,
+			Description: request.Description,
+		},
+	)
+	result, err := usecase.Call()
+
+	if err != nil {
+		e.l.Error(err)
+		return ctx.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"id": result,
+	})
 }
 
 // Create godoc
 func (e *EventsRoutes) Index(ctx *fiber.Ctx) error {
-	repo := repo_admin.NewEventListRepo(e.db, e.l)
-	entity := &entity_admin.EventTable{}
-	usecase := usecase_admin.NewEventsTableCase(repo, entity)
+	usecase := usecase_admin.NewEventsTableCase(
+		repo_admin.NewEventListRepo(e.db, e.l),
+		&entity_admin.EventTable{},
+	)
 	result, err := usecase.Call()
 	if err != nil {
 		e.l.Error(err)
