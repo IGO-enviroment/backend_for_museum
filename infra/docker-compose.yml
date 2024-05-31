@@ -21,14 +21,16 @@ services:
       - 6385:6385
 
   app:
-    build: ../
-    restart: always
-    container_name: app
-    image: app
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: museum_app
     environment:
-      PG_URL: 'postgres://user:pass@localhost:5432/postgres'
+      PG_URL: postgres://user:pass@postgres:5432/postgres
     ports:
-      - 8080:8080
+      - 3000:8080
+    expose:
+      - "3000"
     depends_on:
       - postgres
 

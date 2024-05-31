@@ -49,35 +49,32 @@ type (
 	}
 )
 
-var (
-	_globalCfg  *Config
-	_onceConfig sync.Once
-)
+var onceConfig sync.Once
 
-// Загрузка настроек приложения
+// Загрузка настроек приложения.
 func NewConfig() (*Config, error) {
 	var err error
-	_globalCfg = &Config{}
+	сfg := &Config{}
 
-	_onceConfig.Do(func() {
-		err = cleanenv.ReadConfig("./config/config.yml", _globalCfg)
+	onceConfig.Do(func() {
+		err = cleanenv.ReadConfig("./config/config.yml", сfg)
 		if err != nil {
 			return
 		}
 
-		err = cleanenv.ReadEnv(_globalCfg)
+		err = cleanenv.ReadEnv(сfg)
 	})
 
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 
-	return _globalCfg, nil
+	return сfg, nil
 }
 
 // Получение ранее ранее установленых настроек
-func GetConf() *Config {
-	return _globalCfg
+func GetConf() (*Config, error) {
+	return NewConfig()
 }
 
 func (c *Config) Development() bool {

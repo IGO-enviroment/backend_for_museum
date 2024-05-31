@@ -1,3 +1,48 @@
+definitions:
+  museum_app_entity_client.FindContent:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      value:
+        type: string
+    type: object
+  museum_app_entity_client.ResultContentSearch:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/museum_app_entity_client.FindContent'
+        type: array
+      informations:
+        items:
+          $ref: '#/definitions/museum_app_entity_client.FindContent'
+        type: array
+      news:
+        items:
+          $ref: '#/definitions/museum_app_entity_client.FindContent'
+        type: array
+      page:
+        type: integer
+    type: object
+  museum_app_handlers.ErrorStruct:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/museum_app_handlers.ErrorWithKey'
+        type: array
+      message:
+        type: string
+    type: object
+  museum_app_handlers.ErrorWithKey:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -83,6 +128,56 @@ paths:
       summary: Обновление данных поста
       tags:
       - Админка
+  /v1/admin/topics:
+    get:
+      consumes:
+      - application/json
+      description: Вывод списка всех доступных тем для событий и т.д.
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Все темы
+      tags:
+      - Админка
+    post:
+      consumes:
+      - application/json
+      description: Создание нового поста
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Создание новой новости
+      tags:
+      - Админка
+  /v1/admin/topics/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Создание нового поста
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Обновление данных поста
+      tags:
+      - Админка
   /v1/auth/me:
     get:
       consumes:
@@ -140,4 +235,56 @@ paths:
       summary: Регистрация
       tags:
       - Авторизация
+  /v1/client/billboard:
+    get:
+      consumes:
+      - application/json
+      description: Настроенные по приоритету посты афишы
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Вывод постов для страницы афишы
+      tags:
+      - Клиент сторона
+  /v1/client/content/search:
+    get:
+      consumes:
+      - application/json
+      description: Поиск мероприятий, новостей, статей по тексту и контенту внутри
+        них
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/museum_app_entity_client.ResultContentSearch'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/museum_app_handlers.ErrorStruct'
+      summary: Поиск по названиям и контенту
+      tags:
+      - Клиент сторона
+  /v1/client/popular/filters:
+    get:
+      consumes:
+      - application/json
+      description: Настроенные админами популярные фильтры
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Список популярных фильтров
+      tags:
+      - Клиент сторона
 swagger: "2.0"

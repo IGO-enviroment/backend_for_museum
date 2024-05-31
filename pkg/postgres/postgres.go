@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -28,61 +27,50 @@ type Postgres struct {
 	Pool    *pgxpool.Pool
 }
 
-var (
-	_globalPG *Postgres
-	_oncePG   sync.Once
-)
-
 // New -.
 func New(url string, opts ...Option) (*Postgres, error) {
 	var err error
+	var pg *Postgres
+	var poolConfig *pgxpool.Config
 
-	_oncePG.Do(func() {
-		var poolConfig *pgxpool.Config
+	pg = &Postgres{
+		maxPoolSize:  _defaultMaxPoolSize,
+		connAttempts: _defaultConnAttempts,
+		connTimeout:  _defaultConnTimeout,
+	}
 
-		_globalPG = &Postgres{
-			maxPoolSize:  _defaultMaxPoolSize,
-			connAttempts: _defaultConnAttempts,
-			connTimeout:  _defaultConnTimeout,
+	// Custom options
+	for _, opt := range opts {
+		opt(pg)
+	}
+
+	pg.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+
+	poolConfig, err = pgxpool.ParseConfig(url)
+	if err != nil {
+		return nil, fmt.Errorf("postgres - NewPostgre: %w", err)
+	}
+
+	poolConfig.MaxConns = int32(pg.maxPoolSize)
+
+	for pg.connAttempts > 0 {
+		pg.Pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
+		if err == nil {
+			break
 		}
 
-		// Custom options
-		for _, opt := range opts {
-			opt(_globalPG)
-		}
+		log.Printf("Postgres is trying to connect, attempts left: %d", pg.connAttempts)
 
-		_globalPG.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+		time.Sleep(pg.connTimeout)
 
-		poolConfig, err = pgxpool.ParseConfig(url)
-		if err != nil {
-			return
-		}
-
-		poolConfig.MaxConns = int32(_globalPG.maxPoolSize)
-
-		for _globalPG.connAttempts > 0 {
-			_globalPG.Pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
-			if err == nil {
-				break
-			}
-
-			log.Printf("Postgres is trying to connect, attempts left: %d", _globalPG.connAttempts)
-
-			time.Sleep(_globalPG.connTimeout)
-
-			_globalPG.connAttempts--
-		}
-	})
+		pg.connAttempts--
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgre: %w", err)
 	}
 
-	return _globalPG, nil
-}
-
-func DB() *Postgres {
-	return _globalPG
+	return pg, nil
 }
 
 // Close -.

@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  redis:
+    container_name: shared_redis
+    image: redis:7.2.4-alpine
+    command: --port 6385
+    ports:
+      - 6385:6385
+
+  backend_api:
+    image: museum_backend_api
+    container_name: museum_backend_api
+    env_file:
+      - .env.backend_api
+    ports:
+      - 8080:8080
+    expose:
+      - "8080"
+    depends_on:
+      - shared_redis
+
+  admin_spa:
+    image: museum_admin_spa
+    container_name: museum_admin_spa
+    env_file:
+      - .env.admin_spa
+    ports:
+      - 3005:3005
+    expose:
+      - "3005"
+
+  client_server:
+    image: museum_client_server
+    container_name: museum_client_server
+    env_file:
+      - .env.client_server
+    ports:
+      - 3000:3000
+    expose:
+      - "3000"

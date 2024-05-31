@@ -129,6 +129,82 @@
                 }
             }
         },
+        "/v1/admin/topics": {
+            "get": {
+                "description": "Вывод списка всех доступных тем для событий и т.д.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Админка"
+                ],
+                "summary": "Все темы",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "name search by q",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "description": "Создание нового поста",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Админка"
+                ],
+                "summary": "Создание новой новости",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "name search by q",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/v1/admin/topics/update/{id}": {
+            "put": {
+                "description": "Создание нового поста",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Админка"
+                ],
+                "summary": "Обновление данных поста",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/v1/auth/me": {
             "get": {
                 "description": "Поиск пользователя по токену",
@@ -213,6 +289,154 @@
                     "200": {
                         "description": "OK"
                     }
+                }
+            }
+        },
+        "/v1/client/billboard": {
+            "get": {
+                "description": "Настроенные по приоритету посты афишы",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Клиент сторона"
+                ],
+                "summary": "Вывод постов для страницы афишы",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/v1/client/content/search": {
+            "get": {
+                "description": "Поиск мероприятий, новостей, статей по тексту и контенту внутри них",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Клиент сторона"
+                ],
+                "summary": "Поиск по названиям и контенту",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/museum_app_entity_client.ResultContentSearch"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/museum_app_handlers.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/client/popular/filters": {
+            "get": {
+                "description": "Настроенные админами популярные фильтры",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Клиент сторона"
+                ],
+                "summary": "Список популярных фильтров",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "museum_app_entity_client.FindContent": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "museum_app_entity_client.ResultContentSearch": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/museum_app_entity_client.FindContent"
+                    }
+                },
+                "informations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/museum_app_entity_client.FindContent"
+                    }
+                },
+                "news": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/museum_app_entity_client.FindContent"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "museum_app_handlers.ErrorStruct": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/museum_app_handlers.ErrorWithKey"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "museum_app_handlers.ErrorWithKey": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
                 }
             }
         }
