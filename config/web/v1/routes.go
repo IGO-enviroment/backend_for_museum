@@ -108,13 +108,28 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypes.Post("/create", eventTypesController.Create)
 	}
 
-	// Мероприятия
-	{
-		events := admin.Group("/events")
-		eventsController := admin_handlers.NewEventsRoutes(s.db, s.l)
-		events.Post("/", eventsController.Create)
-		events.Get("/show/:id", eventsController.Show)
-		events.Get("/", eventsController.Index)
-		events.Put("/publish/:id", eventsController.Publish)
-	}
+	EventsRoutes(s, admin)
+
+	ContentBlocksRoutes(s, admin)
+}
+
+// Мероприятия..
+func EventsRoutes(s *Server, admin fiber.Router) {
+	events := admin.Group("/events")
+	eventsController := admin_handlers.NewEventsRoutes(s.db, s.l)
+	events.Post("/", eventsController.Create)
+	events.Get("/show/:id", eventsController.Show)
+	events.Get("/", eventsController.Index)
+	events.Put("/publish/:id", eventsController.Publish)
+}
+
+// Контент блоки.
+func ContentBlocksRoutes(s *Server, admin fiber.Router) {
+	contentBlocks := admin.Group("/content-block")
+	contentBlockController := admin_handlers.NewContentBlocksRoutes(s.db, s.l)
+
+	contentBlocks.Get("/index", contentBlockController.Index)
+	contentBlocks.Post("/create", contentBlockController.Create)
+	contentBlocks.Put("/update/:id", contentBlockController.Update)
+	contentBlocks.Delete("/delete/:id", contentBlockController.Delete)
 }
