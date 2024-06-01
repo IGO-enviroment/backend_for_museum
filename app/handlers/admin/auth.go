@@ -64,5 +64,5 @@ func (a *AuthRoutes) AddUser(ctx *fiber.Ctx) error {
 		return handlers.ErrorResponse(ctx)
 	}
 
-	return nil
+	return ctx.SendStatus(fiber.StatusAccepted)
 }

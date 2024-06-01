@@ -1,7 +1,11 @@
 package middleware
 
 import (
+	"fmt"
+	entity "museum/app/entity/user"
 	"museum/app/models"
+	user_repo "museum/app/repo/user"
+	user_case "museum/app/usecase/user"
 	"museum/app/utils"
 	"museum/pkg/logger"
 	"museum/pkg/postgres"
@@ -51,7 +55,8 @@ func (a *AuthAccess) Аuthorized(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusUnauthorized)
 	}
 
-	id, err := strconv.Atoi(claims["id"].(string))
+	strId := fmt.Sprint(claims["id"])
+	id, err := strconv.Atoi(strId)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusUnauthorized)
 	}
@@ -68,15 +73,8 @@ func (a *AuthAccess) Аuthorized(ctx *fiber.Ctx) error {
 
 // Проверка на наличие роли админа.
 func (a *AuthAccess) AdminAccess(ctx *fiber.Ctx) error {
-	var ok bool
-	_, ok = ctx.Locals("currentUser").(*models.User)
-
-	if !ok {
-		return ctx.SendStatus(fiber.StatusForbidden)
-	}
-
-	ok = false
-	if !ok {
+	user, ok := ctx.Locals("currentUser").(*models.User)
+	if !ok || !user.IsAdmin {
 		return ctx.SendStatus(fiber.StatusForbidden)
 	}
 
@@ -85,15 +83,14 @@ func (a *AuthAccess) AdminAccess(ctx *fiber.Ctx) error {
 
 // Проверка на наличие роли супер админа.
 func (a *AuthAccess) SuperAdminAccess(ctx *fiber.Ctx) error {
-	var ok bool
-	_, ok = ctx.Locals("currentUser").(*models.User)
-
+	user, ok := ctx.Locals("currentUser").(*models.User)
 	if !ok {
 		return ctx.SendStatus(fiber.StatusForbidden)
 	}
 
-	ok = false
-	if !ok {
+	userCase := user_case.NewGetUserCase(user_repo.NewGetUserRepo(a.db, a.l), user.ID)
+	isSuperAdmin, err := userCase.IsUserSuperAdmin()
+	if err != nil || !isSuperAdmin {
 		return ctx.SendStatus(fiber.StatusForbidden)
 	}
 
@@ -116,7 +113,7 @@ func (a *AuthAccess) existsToken(tokenString string) (*jwt.Token, bool) {
 // Очистка лишнего из строки с токеном.
 func (a *AuthAccess) clearToken(authField string) (string, bool) {
 	bearAndToken := 2
-	splited := strings.Split(authField, utils.JwtSeparateKey())
+	splited := strings.Split(authField, " ")
 
 	if len(splited) != bearAndToken {
 		return "", false
@@ -128,11 +125,26 @@ func (a *AuthAccess) clearToken(authField string) (string, bool) {
 }
 
 // Поиск сщуестующего пользователя.
-func (a *AuthAccess) existsUser(_ int) (*models.User, bool) {
+func (a *AuthAccess) existsUser(id int) (*models.User, bool) {
 	var err error
 	if err != nil {
 		return nil, false
 	}
+	userCase := user_case.NewGetUserCase(user_repo.NewGetUserRepo(a.db, a.l), id)
+	userById, err := userCase.Call()
+	if userById == nil || err != nil {
+		return nil, false
+	}
 
-	return nil, true
+	return mapToDbUser(userById), true
+}
+
+func mapToDbUser(user *entity.User) *models.User {
+	return &models.User{
+		ID:             user.ID,
+		Email:          user.Email,
+		DigestPassword: user.DigestPassword,
+		IsAdmin:        user.IsAdmin,
+		CreatedAt:      user.CreatedAt,
+	}
 }
