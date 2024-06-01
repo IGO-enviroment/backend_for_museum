@@ -7,20 +7,23 @@ import (
 
 // Мероприятия.
 type Event struct {
-	ID      int
-	Title   string
+	ID          int
+	Title       string
+	Description string
+
 	Publish bool
 
 	TicketCount int
 
-	StartAt *time.Time
+	StartAt time.Time
 
 	Duration int
 
 	AreaID int
 	TypeID int
 
-	CreatedAt *time.Time
+	CreatedAt time.Time
+	UpdateAt  time.Time
 }
 
 type EventModel struct {

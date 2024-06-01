@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"golang.org/x/text/language"
 )
@@ -67,6 +68,11 @@ func (s *Server) settingApp() {
 			DefaultLanguage: language.Russian,
 		}),
 	)
+
+	s.app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowCredentials: false,
+	}))
 
 	// Подключение сжатия
 	s.app.Use(compress.New(compress.Config{

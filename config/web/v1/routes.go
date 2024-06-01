@@ -1,10 +1,11 @@
 package v1
 
 import (
-	"github.com/gofiber/fiber/v2"
 	admin_handlers "museum/app/handlers/admin"
 	client_handlers "museum/app/handlers/client"
 	"museum/app/middleware"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func SetRoutes(s *Server) {
@@ -105,5 +106,14 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypes := admin.Group("/event-types")
 		eventTypesController := admin_handlers.NewEventTypesRoutes(s.db, s.l)
 		eventTypes.Post("/create", eventTypesController.Create)
+	}
+
+	// Мероприятия
+	{
+		events := admin.Group("/events")
+		eventsController := admin_handlers.NewEventsRoutes(s.db, s.l)
+		events.Post("/", eventsController.Create)
+		events.Get("/show/:id", eventsController.Show)
+		events.Get("/", eventsController.Index)
 	}
 }
