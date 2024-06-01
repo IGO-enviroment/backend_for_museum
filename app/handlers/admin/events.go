@@ -72,7 +72,24 @@ func (e *EventsRoutes) Show(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusCreated)
 }
 
-// Publi
+// Publish
 func (e *EventsRoutes) Publish(ctx *fiber.Ctx) error {
+	var request contract_admin.PublishEvent
+	if err := ctx.BodyParser(&request); err != nil {
+		e.l.Error(err)
+
+		return handlers.ErrorResponse(ctx)
+	}
+
+	usecase := usecase_admin.NewPublishEventCase(
+		repo_admin.NewPublishEventRepo(e.db, e.l),
+		&entity_admin.PublishEventEntity{ID: request.ID},
+	)
+
+	ok, err := usecase.Call()
+	if !ok {
+		return ctx.Status(fiber.StatusOK).JSON(err)
+	}
+
 	return ctx.SendStatus(fiber.StatusCreated)
 }

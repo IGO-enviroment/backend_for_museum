@@ -5,7 +5,7 @@ import (
 	entity_client "museum/app/entity/client"
 	repo_client "museum/app/repo/client"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 const perPage = 10

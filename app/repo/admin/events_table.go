@@ -5,7 +5,7 @@ import (
 	"museum/pkg/logger"
 	"museum/pkg/postgres"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 type EventListRepo struct {

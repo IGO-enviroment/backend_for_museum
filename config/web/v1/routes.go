@@ -115,5 +115,6 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		events.Post("/", eventsController.Create)
 		events.Get("/show/:id", eventsController.Show)
 		events.Get("/", eventsController.Index)
+		events.Put("/publish/:id", eventsController.Publish)
 	}
 }
