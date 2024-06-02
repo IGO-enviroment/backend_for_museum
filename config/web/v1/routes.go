@@ -106,6 +106,7 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypes := admin.Group("/event-types")
 		eventTypesController := admin_handlers.NewEventTypesRoutes(s.db, s.l)
 		eventTypes.Post("/create", eventTypesController.Create)
+		eventTypes.Get("/ids", eventTypesController.IndexEventTypesID)
 	}
 
 	// Теги для мероприятий.
