@@ -108,12 +108,26 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypes.Post("/create", eventTypesController.Create)
 	}
 
+	// Теги для мероприятий.
+	{
+		tags := admin.Group("/tags")
+		tagsController := admin_handlers.NewTagsRoutes(s.db, s.l)
+		tags.Get("/ids", tagsController.IndexTagsID)
+	}
+
+	// Площадки.
+	{
+		areas := admin.Group("/areas")
+		areasController := admin_handlers.NewAreasRoutes(s.db, s.l)
+		areas.Get("/ids", areasController.IndexAreasID)
+	}
+
 	EventsRoutes(s, admin)
 
 	ContentBlocksRoutes(s, admin)
 }
 
-// Мероприятия..
+// Мероприятия.
 func EventsRoutes(s *Server, admin fiber.Router) {
 	events := admin.Group("/events")
 	eventsController := admin_handlers.NewEventsRoutes(s.db, s.l)
