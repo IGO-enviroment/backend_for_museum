@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"mime/multipart"
 	contract_admin "museum/app/contract/admin"
 	entity_admin "museum/app/entity/admin"
@@ -10,6 +9,7 @@ import (
 	usecase_admin "museum/app/usecase/admin"
 	"museum/pkg/logger"
 	"museum/pkg/postgres"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gookit/validate"
@@ -58,19 +58,19 @@ func (e *EventsRoutes) Create(ctx *fiber.Ctx) error {
 	usecase := usecase_admin.NewCreateEventCase(
 		&repo,
 		&entity_admin.CreateEventEntity{
-			Title:        request.Title,
-			Description:  &request.Description,
-			StartAt:      request.StartAt,
-			Duration:     &request.Duration,
-			Area:         &request.AreaID,
-			Type:         &request.TypeID,
-			Tags:         &request.TagIDS,
-			PreviewImage: e.fileFromForm(form, "previewFile"),
+			Title:           request.Title,
+			Description:     &request.Description,
+			StartAt:         &request.StartAt,
+			Duration:        &request.Duration,
+			Area:            &request.AreaID,
+			Type:            &request.TypeID,
+			Tags:            &request.TagIDS,
+			PreviewImage:    e.fileFromForm(form, "previewFile"),
+			AdditionalFiles: e.filesFromForm(form, "additionalFiles"),
 		},
 	)
 	result, errResp := usecase.Call()
 
-	fmt.Println("12313122132")
 	if result == 0 {
 		e.l.Error(errResp)
 
@@ -99,7 +99,7 @@ func (e *EventsRoutes) Index(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(result)
 }
 
-// Create godoc
+// Show godoc
 func (e *EventsRoutes) Show(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusCreated)
 }
@@ -134,4 +134,18 @@ func (e *EventsRoutes) fileFromForm(form *multipart.Form, key string) *multipart
 	}
 
 	return files[0]
+}
+
+func (e *EventsRoutes) filesFromForm(form *multipart.Form, key string) []*multipart.FileHeader {
+	var result []*multipart.FileHeader
+
+	for field, file := range form.File {
+		if !strings.Contains(field, key) {
+			continue
+		}
+
+		result = append(result, file[0])
+	}
+
+	return result
 }

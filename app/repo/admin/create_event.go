@@ -24,7 +24,7 @@ func NewCreateEventRepo(db *postgres.Postgres, l *logger.Logger) CreateEventRepo
 	}
 }
 
-func (c *CreateEventRepo) Call(event map[string]interface{}) (int, error) {
+func (c *CreateEventRepo) Call(event map[string]interface{}, additionalUrls *[]string) (int, error) {
 	var id int
 
 	tx, err := c.db.Pool.Begin(c.context)
@@ -49,6 +49,15 @@ func (c *CreateEventRepo) Call(event map[string]interface{}) (int, error) {
 
 	if event["tag_ids"] != nil {
 		err = c.createTagsLink(tx, id, event["tag_ids"].([]int))
+		if err != nil {
+			tx.Rollback(c.context)
+
+			return 0, err
+		}
+	}
+
+	if additionalUrls != nil && len(*additionalUrls) != 0 {
+		err = c.createContentBlock(tx, id, *additionalUrls)
 		if err != nil {
 			tx.Rollback(c.context)
 
@@ -85,6 +94,27 @@ func (c *CreateEventRepo) createTagsLink(tx pgx.Tx, eventID int, tags []int) err
 			"event_id", "tag_id", "created_at", "updated_at",
 		).Values(
 			eventID, tagID, time.Now(), time.Now(),
+		).ToSql()
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.Exec(c.context, sql, args...)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *CreateEventRepo) createContentBlock(tx pgx.Tx, eventID int, additionalUrls []string) error {
+	for index, additionalUrl := range additionalUrls {
+		sql, args, err := c.db.Builder.Insert("contents").Columns(
+			"model_id", "model_type", "type", "value", "order_value",
+			"created_at", "updated_at",
+		).Values(
+			eventID, "events", "image", additionalUrl, index, time.Now(), time.Now(),
 		).ToSql()
 		if err != nil {
 			return err
