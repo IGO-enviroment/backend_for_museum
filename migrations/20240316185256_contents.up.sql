@@ -4,9 +4,9 @@ BEGIN;
 create table contents (
     id SERIAL PRIMARY KEY,          -- Уникальный ID
 
-    type_value VARCHAR(50),         -- Тип контента
+    type VARCHAR(50),         -- Тип контента
 
-    data_value TEXT,                -- Данные блока с контентом: [текст, сслыка и т.п.]
+    value TEXT,                -- Данные блока с контентом: [текст, сслыка и т.п.]
 
     order_value INTEGER,            -- Порядок вывода
 
@@ -16,7 +16,8 @@ create table contents (
     options JSON NOT NULL DEFAULT '{}'::jsonb,   -- Дополнительные настройки
 
     -- Таймстамп
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP
 );
 
 COMMIT;
