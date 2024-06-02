@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"mime/multipart"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -8,13 +9,14 @@ import (
 
 // Создание мероприятия.
 type CreateEventEntity struct {
-	Title       string
-	Description string
-	StartAt     time.Time
-	TicketCount int
-	Area        int
-	Type        int
-	Tags        []int
+	Title        string
+	Description  string
+	StartAt      time.Time
+	TicketCount  int
+	Area         int
+	Type         int
+	Tags         []int
+	PreviewImage *multipart.FileHeader
 }
 
 // Публикация мероприятия.

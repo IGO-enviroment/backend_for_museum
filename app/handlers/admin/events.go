@@ -30,7 +30,9 @@ func (e *EventsRoutes) Create(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&request); err != nil {
 		e.l.Error(err)
 
-		return handlers.ErrorResponse(ctx)
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(
+			handlers.ValidatorErrors(err),
+		)
 	}
 
 	repo := repo_admin.NewCreateEventRepo(e.db, e.l)
@@ -45,6 +47,7 @@ func (e *EventsRoutes) Create(ctx *fiber.Ctx) error {
 
 	if err != nil {
 		e.l.Error(err)
+
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 
@@ -60,10 +63,13 @@ func (e *EventsRoutes) Index(ctx *fiber.Ctx) error {
 		&entity_admin.EventTable{},
 	)
 	result, err := usecase.Call()
+
 	if err != nil {
 		e.l.Error(err)
+
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
+
 	return ctx.Status(fiber.StatusOK).JSON(result)
 }
 
