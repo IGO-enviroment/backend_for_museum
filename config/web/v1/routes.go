@@ -36,6 +36,7 @@ func ClientRoutes(s *Server, v1 fiber.Router) {
 		eventsController := client_handlers.NewClientEventsRoutes(s.db, s.l)
 		client.Get("/index", eventsController.Index)
 		client.Get("/events/filter", eventsController.Filter)
+		client.Get("/events/:id", eventsController.Show)
 	}
 
 	// Данные по популярным фильтрам

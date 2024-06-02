@@ -62,9 +62,17 @@ type PagePagination struct {
 	Current int `json:"current"`
 }
 
-// Ответ по страницы фильтрации
+// Ответ по страницы фильтрации.
 type EventsResponse struct {
 	Filters []FilterItem   `json:"filters"`
 	Events  []EventItem    `json:"events"`
 	Page    PagePagination `json:"page"`
+}
+
+type ShowEvent struct {
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	PreviewURL  string `json:"previewUrl"`
+	Images      string `json:"images"`
 }
