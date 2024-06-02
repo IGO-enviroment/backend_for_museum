@@ -5,6 +5,7 @@ import (
 	entity_admin "museum/app/entity/admin"
 	"museum/app/handlers"
 	repo_admin "museum/app/repo/admin"
+	"time"
 )
 
 type CreateEventCase struct {
@@ -22,6 +23,7 @@ func NewCreateEventCase(repo *repo_admin.CreateEventRepo, entity *entity_admin.C
 
 func (e *CreateEventCase) Call() (int, *handlers.ErrorStruct) {
 	var previewURL string
+	var additionalUrls []string
 	var err error
 	var ok bool
 
@@ -32,7 +34,14 @@ func (e *CreateEventCase) Call() (int, *handlers.ErrorStruct) {
 		}
 	}
 
-	id, err := e.repo.Call(e.CollectData(&previewURL))
+	if len(e.entity.AdditionalFiles) != 0 {
+		additionalUrls, ok = e.uploadAdditional()
+		if !ok {
+			return 0, &e.errorResp
+		}
+	}
+
+	id, err := e.repo.Call(e.CollectData(&previewURL), &additionalUrls)
 	if err != nil {
 		e.errorResp.Msg = "Неизвестная ошибка"
 
@@ -51,8 +60,8 @@ func (e *CreateEventCase) CollectData(previewURL *string) map[string]interface{}
 		data["description"] = *e.entity.Description
 	}
 
-	if e.entity.StartAt != nil && !(*e.entity.StartAt).IsZero() {
-		data["start_at"] = *e.entity.StartAt
+	if valid, startAt := e.isValidDate(e.entity.StartAt); valid {
+		data["start_at"] = startAt
 	}
 
 	if e.entity.Area != nil && *e.entity.Area != 0 && e.repo.ExistRecord("areas", []int{*e.entity.Area}) {
@@ -82,6 +91,18 @@ func (e *CreateEventCase) CollectData(previewURL *string) map[string]interface{}
 	return data
 }
 
+func (e *CreateEventCase) isValidDate(date *string) (bool, *time.Time) {
+	if date != nil && *date != "" {
+		return false, nil
+	}
+
+	if formattedDate, err := time.Parse(time.RFC3339, *date); err != nil {
+		return true, &formattedDate
+	}
+
+	return false, nil
+}
+
 func (e *CreateEventCase) uploadPreview() (string, bool) {
 	objectURL, err := external.NewUploadFileAPI(e.entity.PreviewImage).UploadObject()
 	if err != nil {
@@ -96,4 +117,26 @@ func (e *CreateEventCase) uploadPreview() (string, bool) {
 	}
 
 	return objectURL, true
+}
+
+func (e *CreateEventCase) uploadAdditional() ([]string, bool) {
+	var urls []string
+
+	for _, addtionalFile := range e.entity.AdditionalFiles {
+		objectURL, err := external.NewUploadFileAPI(addtionalFile).UploadObject()
+		if err != nil {
+			e.errorResp.Errors = append(e.errorResp.Errors,
+				handlers.ErrorWithKey{
+					Key:   "AdditionalFiles",
+					Value: "Ошибка при сохранении изображений",
+				},
+			)
+
+			return urls, false
+		}
+
+		urls = append(urls, objectURL)
+	}
+
+	return urls, true
 }

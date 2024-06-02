@@ -7,15 +7,24 @@ import (
 
 // Создание мероприятия.
 type CreateEventEntity struct {
-	Title        string
-	Description  *string
-	Duration     *int
-	StartAt      *time.Time
-	TicketCount  *int
-	Area         *int
-	Type         *int
-	Tags         *[]int
-	PreviewImage *multipart.FileHeader
+	Title           string
+	Description     *string
+	Duration        *int
+	StartAt         *string
+	TicketCount     *int
+	Area            *int
+	Type            *int
+	Tags            *[]int
+	PreviewImage    *multipart.FileHeader
+	AdditionalFiles []*multipart.FileHeader
+}
+
+type ShowEventEntity struct {
+	Tags []ShowEventTags
+}
+type ShowEventTags struct {
+	ID   int
+	Name string
 }
 
 // Публикация мероприятия.

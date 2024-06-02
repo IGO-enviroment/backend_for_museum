@@ -57,7 +57,7 @@ func (e *EventModel) Find(id int) (Event, error) {
 		return e.event, err
 	}
 
-	e.event, err = pgx.CollectOneRow[Event](rows, pgx.RowToStructByPos[Event])
+	e.event, err = pgx.CollectOneRow(rows, pgx.RowToStructByPos[Event])
 	if err != nil {
 		return e.event, err
 	}
