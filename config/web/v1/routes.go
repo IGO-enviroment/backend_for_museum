@@ -61,6 +61,8 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		authPermissions.Аuthorized, authPermissions.AdminAccess,
 	)
 
+	checkAuth := v1.Group("/check", authPermissions.Аuthorized)
+
 	superAdmin := v1.Group(
 		"/admin",
 		authPermissions.Аuthorized, authPermissions.SuperAdminAccess,
@@ -79,6 +81,9 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		// Админ
 		token := auth.Group("/token")
 		token.Post("/generate", authController.GetToken)
+
+		// Проверка на валидность токена
+		checkAuth.Get("/", authController.Check)
 	}
 
 	// Работа с постами
@@ -106,6 +111,7 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypes := admin.Group("/event-types")
 		eventTypesController := admin_handlers.NewEventTypesRoutes(s.db, s.l)
 		eventTypes.Post("/create", eventTypesController.Create)
+		eventTypes.Get("/", eventTypesController.GetAll)
 	}
 
 	EventsRoutes(s, admin)

@@ -6,6 +6,7 @@ import (
 	admin_auth "museum/app/contract/admin/auth"
 	"museum/app/contract/superadmin"
 	"museum/app/handlers"
+	"museum/app/models"
 	admin_repo "museum/app/repo/admin"
 	admin_usecase "museum/app/usecase/admin"
 	"museum/app/utils"
@@ -40,20 +41,19 @@ func (a *AuthRoutes) GetToken(ctx *fiber.Ctx) error {
 
 	token, err := utils.GenerateToken(admin.Id, loginModel.Email, admin.Role)
 	var twoMonth time.Duration = 1460
-
+	cookie := &fiber.Cookie{
+		Name:     "museum_client_auth",
+		Value:    fmt.Sprintf("Bear %s", token),
+		SameSite: "Lax",
+		Secure:   false,
+		HTTPOnly: true,
+		Expires:  time.Now().Add(time.Hour * twoMonth).Local(),
+	}
 	ctx.Cookie(
-		&fiber.Cookie{
-			Domain:   "museum-ekb.ru",
-			Name:     "museum_client_auth",
-			Value:    fmt.Sprintf("Bear %s", token),
-			SameSite: "Lax",
-			Secure:   true,
-			HTTPOnly: true,
-			Expires:  time.Now().Add(time.Hour * twoMonth).Local(),
-		},
+		cookie,
 	)
 
-	return ctx.SendStatus(fiber.StatusAccepted)
+	return ctx.Status(fiber.StatusOK).JSON(cookie)
 }
 
 func (a *AuthRoutes) AddUser(ctx *fiber.Ctx) error {
@@ -65,4 +65,12 @@ func (a *AuthRoutes) AddUser(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.SendStatus(fiber.StatusAccepted)
+}
+
+func (a *AuthRoutes) Check(ctx *fiber.Ctx) error {
+	user, ok := ctx.Locals("currentUser").(*models.User)
+	if !ok {
+		return ctx.SendStatus(fiber.StatusForbidden)
+	}
+	return ctx.Status(fiber.StatusOK).JSON(user)
 }

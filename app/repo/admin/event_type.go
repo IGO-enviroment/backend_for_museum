@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	tableName = "event_types"
+	tableName = "type_events"
 )
 
 type EventTypeRepo struct {
@@ -54,6 +54,37 @@ func (e EventTypeRepo) Create(entity entity_admin.EventTypeEntity) (int, error) 
 		return id, nil
 	}
 	return 0, nil
+}
+
+func (e EventTypeRepo) Get() ([]entity_admin.EventTypeEntity, error) {
+	var result []entity_admin.EventTypeEntity
+	sql, args, err := e.db.Builder.
+		Select(
+			"name",
+			"description",
+			"is_visible",
+		).
+		From(tableName).
+		ToSql()
+	if err != nil {
+		e.l.Error("Unable to build SELECT query", err)
+		return nil, err
+	}
+
+	rows, err := e.db.Pool.Query(context.Background(), sql, args...)
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var eventType entity_admin.EventTypeEntity
+		err := rows.Scan(&eventType.Name, &eventType.Description, &eventType.IsVisible)
+		if err != nil {
+			e.l.Error("Unable to scan INSERT query", err)
+			return nil, err
+		}
+		result = append(result, eventType)
+	}
+	return result, nil
 }
 
 func mapToEventTypeDb(entity entity_admin.EventTypeEntity) models.EventType {
