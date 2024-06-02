@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"fmt"
-
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gookit/validate"
 )
 
 type ErrorWithKey struct {
@@ -17,30 +15,30 @@ type ErrorStruct struct {
 	Errors []ErrorWithKey `json:"errors"`
 }
 
-func ErrorResponse(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusUnprocessableEntity).JSON(ErrorStruct{})
+func NewErrorStruct(msg string, fields *map[string]string) *ErrorStruct {
+	response := ErrorStruct{Msg: msg, Errors: []ErrorWithKey{}}
+
+	if fields != nil {
+		for key, value := range *fields {
+			response.Errors = append(response.Errors, ErrorWithKey{Key: key, Value: value})
+		}
+	}
+
+	return &response
 }
 
-func ValidatorErrors(err error) *ErrorStruct {
-	errorResponse := ErrorStruct{}
+func ValidatorErrors(err validate.Errors) *ErrorStruct {
+	response := ErrorStruct{Msg: "", Errors: []ErrorWithKey{}}
 
-	validateErrors := err.(validator.ValidationErrors)
-	if len(validateErrors) == 0 {
-		errorResponse.Msg = "Неизвестная ошибка"
-
-		return &errorResponse
+	for field, _ := range err.All() {
+		response.Errors = append(response.Errors, ErrorWithKey{
+			Key: field, Value: err.FieldOne(field),
+		})
 	}
 
-	for _, err := range validateErrors {
-		errorResponse.Errors = append(errorResponse.Errors,
-			ErrorWithKey{
-				Key: err.Field(),
-				Value: fmt.Sprintf(
-					"Поле %s содержит недопустимое значение", err.Tag(),
-				),
-			},
-		)
-	}
+	return &response
+}
 
-	return &errorResponse
+func ErrorResponse(ctx *fiber.Ctx) error {
+	return ctx.Status(fiber.StatusUnprocessableEntity).JSON(ErrorStruct{})
 }

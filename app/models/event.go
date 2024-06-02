@@ -25,6 +25,7 @@ type Event struct {
 
 	AreaID int
 	TypeID int
+	TagIDS []int
 
 	PreviewURL string
 

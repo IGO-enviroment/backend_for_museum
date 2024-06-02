@@ -1,9 +1,16 @@
 package admin
 
+import "time"
+
 type CreateEvent struct {
-	Title       string `json:"title" validate:"required,max=255"`
-	Description string `json:"description,omitempty" validate:"max=5000"`
-	StartAt     string `json:"startAt,omitempty"`
+	Title       string     `form:"title" validate:"required|max_len:255" message:"required:Обязательное поле"`
+	Description string     `form:"description,omitempty" validate:"max_len:10000" message:"max:Слишком большое поле"`
+	StartAt     *time.Time `form:"startAt,omitempty" validate:"-"`
+	AreaID      int        `form:"area,omitempty" validate:"-"`
+	TypeID      int        `form:"type,omitempty" validate:"-"`
+	TagIDS      []int      `form:"tags,omitempty" validate:"-"`
+	Duration    int        `form:"duration,omitempty" validate:"int"`
+	TicketCount int        `form:"ticketCount,omitempty" validate:"int"`
 }
 
 type CreateEventType struct {

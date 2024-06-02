@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+	"mime/multipart"
 	contract_admin "museum/app/contract/admin"
 	entity_admin "museum/app/entity/admin"
 	"museum/app/handlers"
@@ -10,6 +12,7 @@ import (
 	"museum/pkg/postgres"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gookit/validate"
 )
 
 type EventsRoutes struct {
@@ -24,14 +27,30 @@ func NewEventsRoutes(db *postgres.Postgres, l *logger.Logger) *EventsRoutes {
 	}
 }
 
-// Create godoc
+// Create godoc.
 func (e *EventsRoutes) Create(ctx *fiber.Ctx) error {
 	var request contract_admin.CreateEvent
 	if err := ctx.BodyParser(&request); err != nil {
 		e.l.Error(err)
 
 		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(
-			handlers.ValidatorErrors(err),
+			handlers.NewErrorStruct("Неверные параметры запроса", nil),
+		)
+	}
+
+	v := validate.Struct(&request)
+	if !v.Validate() {
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(
+			handlers.ValidatorErrors(v.Errors),
+		)
+	}
+
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		e.l.Error(err)
+
+		return ctx.Status(fiber.StatusBadRequest).JSON(
+			handlers.ErrorStruct{Msg: "Неизвестная ошибка"},
 		)
 	}
 
@@ -39,16 +58,23 @@ func (e *EventsRoutes) Create(ctx *fiber.Ctx) error {
 	usecase := usecase_admin.NewCreateEventCase(
 		&repo,
 		&entity_admin.CreateEventEntity{
-			Title:       request.Title,
-			Description: request.Description,
+			Title:        request.Title,
+			Description:  &request.Description,
+			StartAt:      request.StartAt,
+			Duration:     &request.Duration,
+			Area:         &request.AreaID,
+			Type:         &request.TypeID,
+			Tags:         &request.TagIDS,
+			PreviewImage: e.fileFromForm(form, "previewFile"),
 		},
 	)
-	result, err := usecase.Call()
+	result, errResp := usecase.Call()
 
-	if err != nil {
-		e.l.Error(err)
+	fmt.Println("12313122132")
+	if result == 0 {
+		e.l.Error(errResp)
 
-		return ctx.SendStatus(fiber.StatusInternalServerError)
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(errResp)
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
@@ -98,4 +124,14 @@ func (e *EventsRoutes) Publish(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.SendStatus(fiber.StatusCreated)
+}
+
+func (e *EventsRoutes) fileFromForm(form *multipart.Form, key string) *multipart.FileHeader {
+	files := form.File[key]
+
+	if len(files) == 0 {
+		return nil
+	}
+
+	return files[0]
 }

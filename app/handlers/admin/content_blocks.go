@@ -28,7 +28,7 @@ func (c *ContentBlocksRoutes) Create(ctx *fiber.Ctx) error {
 	var request contract_admin.CreateContentBlocks
 	if err := ctx.BodyParser(&request); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(
-			handlers.ValidatorErrors(err),
+			handlers.NewErrorStruct("Неверные параметры запроса", nil),
 		)
 	}
 
