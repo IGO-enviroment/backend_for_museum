@@ -3,8 +3,6 @@ package entity
 import (
 	"mime/multipart"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 // Создание мероприятия.
@@ -31,38 +29,12 @@ type EventTable struct {
 
 // Элементы в таблицe.
 type EventForTable struct {
-	ID          int       `json:"id"`
-	Publish     bool      `json:"publich"`
-	Title       string    `json:"title"`
-	TicketCount int       `json:"ticketCount"`
-	Type        string    `json:"type"`
-	Area        string    `json:"area"`
-	CreatedAt   time.Time `json:"created_at"`
-}
-
-func (e *EventTable) ScanFromEquery(rows pgx.Rows) (EventTable, error) {
-	result := EventTable{
-		Events: []EventForTable{},
-	}
-
-	for rows.Next() {
-		var item EventForTable
-
-		err := rows.Scan(
-			&item.ID,
-			&item.Title,
-			&item.Publish,
-			&item.TicketCount,
-			&item.Type,
-			&item.Area,
-			&item.CreatedAt,
-		)
-		if err != nil {
-			return result, err
-		}
-
-		result.Events = append(result.Events, item)
-	}
-
-	return result, nil
+	ID          int        `json:"id"`
+	Publish     bool       `json:"publish"`
+	Title       string     `json:"title"`
+	TicketCount int        `json:"ticketCount"`
+	Type        *string    `json:"type"`
+	Area        *string    `json:"area"`
+	StartAt     *time.Time `json:"start_at"`
+	CreatedAt   time.Time  `json:"created_at"`
 }

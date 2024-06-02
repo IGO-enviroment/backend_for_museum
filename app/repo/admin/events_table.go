@@ -33,7 +33,7 @@ func (e *EventListRepo) Call() (pgx.Rows, error) {
 func (e *EventListRepo) query() error {
 	sql, args, err := e.db.Builder.Select(
 		"events.id, events.title, events.publish, events.ticket_count",
-		"type_events.name as type, areas.name as area, events.created_at",
+		"type_events.name as type, areas.name as area, events.start_at, events.created_at",
 	).From("events").LeftJoin(
 		"type_events ON type_events.id = events.type_id",
 	).LeftJoin(

@@ -3,6 +3,8 @@ package admin
 import (
 	entity_admin "museum/app/entity/admin"
 	repo_admin "museum/app/repo/admin"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type EventsTableCase struct {
@@ -19,11 +21,21 @@ func NewEventsTableCase(
 	}
 }
 
+// Выгружаем все события.
 func (e *EventsTableCase) Call() (entity_admin.EventTable, error) {
 	rows, err := e.repo.Call()
 	if err != nil {
 		return entity_admin.EventTable{}, err
 	}
 
-	return e.entity.ScanFromEquery(rows)
+	events, err := pgx.CollectRows(rows, pgx.RowToStructByName[entity_admin.EventForTable])
+	if err != nil {
+		return entity_admin.EventTable{}, err
+	}
+
+	result := entity_admin.EventTable{
+		Events: events,
+	}
+
+	return result, nil
 }
