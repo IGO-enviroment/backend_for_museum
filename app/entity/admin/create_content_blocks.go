@@ -8,5 +8,5 @@ type CreateContentBlocksEntity struct {
 	Type       string
 	Index      int
 	ValueStr   string
-	ValueFile  multipart.File
+	ValueFile  *multipart.FileHeader
 }

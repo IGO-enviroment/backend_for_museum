@@ -1,10 +1,8 @@
 package external
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"museum/app/utils"
 	"museum/config"
@@ -19,18 +17,14 @@ const (
 )
 
 type UploadFileAPI struct {
-	bucketName      string
-	endpoint        string
-	accessKey       string
-	secretAccessKey string
-	region          string
+	bucketName string
+	endpoint   string
 
-	file multipart.File
-
+	file     *multipart.FileHeader
 	s3Client *minio.Client
 }
 
-func NewUploadFileAPI(file multipart.File) *UploadFileAPI {
+func NewUploadFileAPI(file *multipart.FileHeader) *UploadFileAPI {
 	return &UploadFileAPI{
 		file: file,
 	}
@@ -41,24 +35,29 @@ func (c *UploadFileAPI) UploadObject() (string, error) {
 		return "", err
 	}
 
-	buf := &bytes.Buffer{}
-	nRead, err := io.Copy(buf, c.file)
-
+	object, err := c.file.Open()
 	if err != nil {
 		return "", err
 	}
+	defer object.Close()
 
 	fileName := c.generateFileName()
 	info, err := c.s3Client.PutObject(
 		context.Background(), c.bucketName, fileName,
-		c.file, nRead, minio.PutObjectOptions{ContentType: contentType},
+		object, c.file.Size, minio.PutObjectOptions{ContentType: contentType},
 	)
 
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s/%s/%s", info.Location, info.Bucket, info.Key), nil
+	return c.objectURL(&info), nil
+}
+
+func (c *UploadFileAPI) objectURL(info *minio.UploadInfo) string {
+	return fmt.Sprintf(
+		"https://%s/%s/%s", c.endpoint, info.Bucket, info.Key,
+	)
 }
 
 func (c *UploadFileAPI) initClient() error {
@@ -71,6 +70,7 @@ func (c *UploadFileAPI) initClient() error {
 	}
 
 	c.bucketName = cfg.BucketName
+	c.endpoint = cfg.EndPoint
 
 	c.s3Client, err = minio.New(
 		c.endpoint,

@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -58,27 +57,23 @@ type (
 	}
 )
 
-var onceConfig sync.Once
-
 // Загрузка настроек приложения.
 func NewConfig() (*Config, error) {
 	var err error
-	сfg := &Config{}
 
-	onceConfig.Do(func() {
-		err = cleanenv.ReadConfig("./config/config.yml", сfg)
-		if err != nil {
-			return
-		}
+	cfg := &Config{}
 
-		err = cleanenv.ReadEnv(сfg)
-	})
+	err = cleanenv.ReadConfig("./config/config.yml", cfg)
+	if err != nil {
+		return cfg, err
+	}
 
+	err = cleanenv.ReadEnv(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 
-	return сfg, nil
+	return cfg, nil
 }
 
 // Получение ранее ранее установленых настроек

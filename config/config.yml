@@ -24,7 +24,7 @@ env:
 
 s3:
   bucket_name: "594c4f91-711b7067-2c84-4606-86db-514e42c63056"
-  end_point: "https://s3.timeweb.cloud"
+  end_point: "s3.timeweb.cloud"
   region: "ru-1"
   access_key: "access_key"
   secret_access_key: "secret_access_key"

@@ -26,7 +26,7 @@ func (c *CreateContentBlocksRepo) CreateBlock(
 ) bool {
 	var id int
 
-	sql, args, err := c.db.Builder.Insert("content").Columns(
+	sql, args, err := c.db.Builder.Insert("contents").Columns(
 		"model_id", "model_type", "type", "value", "order_value",
 		"created_at", "updated_at",
 	).Values(

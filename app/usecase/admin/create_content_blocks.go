@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	parentInfo = "info"
+	parentInfo = "informations"
 	textType   = "text"
 	fileType   = "file"
 	imageType  = "image"
@@ -136,6 +136,8 @@ func (c *CreateContentBlocksCase) isValidFields() bool {
 				Key: "valueStr", Value: "Пустой контент блока",
 			},
 		)
+
+		return false
 	}
 
 	if c.entity.Type != textType && c.entity.ValueFile == nil {
@@ -144,6 +146,8 @@ func (c *CreateContentBlocksCase) isValidFields() bool {
 				Key: "valueFile", Value: "Пустой контент блока",
 			},
 		)
+
+		return false
 	}
 
 	return true

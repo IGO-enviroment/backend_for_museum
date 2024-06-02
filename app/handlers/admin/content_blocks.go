@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"mime/multipart"
 	contract_admin "museum/app/contract/admin"
 	admin_entity "museum/app/entity/admin"
-	"museum/app/handlers"
 	admin_repo "museum/app/repo/admin"
 	usecase_admin "museum/app/usecase/admin"
+
+	"museum/app/handlers"
 	"museum/pkg/logger"
 	"museum/pkg/postgres"
 
@@ -30,6 +32,15 @@ func (c *ContentBlocksRoutes) Create(ctx *fiber.Ctx) error {
 		)
 	}
 
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		c.l.Error(err)
+
+		return ctx.Status(fiber.StatusBadRequest).JSON(
+			handlers.ErrorStruct{Msg: "Неизвестная ошибка"},
+		)
+	}
+
 	usecase := usecase_admin.NewCreateContentBlocksCaseCase(
 		admin_repo.NewContentBlocksRepo(c.db, c.l),
 		&admin_entity.CreateContentBlocksEntity{
@@ -38,13 +49,13 @@ func (c *ContentBlocksRoutes) Create(ctx *fiber.Ctx) error {
 			Type:       request.Type,
 			Index:      request.Index,
 			ValueStr:   request.ValueStr,
-			ValueFile:  request.ValueFile,
+			ValueFile:  c.fileFromForm(form, "valueFile"),
 		},
 	)
 
-	ok, err := usecase.Call()
+	ok, errResp := usecase.Call()
 	if !ok {
-		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(err)
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(errResp)
 	}
 
 	return ctx.SendStatus(fiber.StatusCreated)
@@ -60,7 +71,17 @@ func (c *ContentBlocksRoutes) Index(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusOK)
 }
 
-// Удаление блока,
+// Удаление блока.
 func (c *ContentBlocksRoutes) Delete(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusOK)
+}
+
+func (c *ContentBlocksRoutes) fileFromForm(form *multipart.Form, key string) *multipart.FileHeader {
+	files := form.File[key]
+
+	if len(files) == 0 {
+		return nil
+	}
+
+	return files[0]
 }
