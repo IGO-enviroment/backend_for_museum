@@ -23,7 +23,7 @@ env:
   level: development
 
 s3:
-  bucket_name: "594c4f91-17859372-8f32-4427-a9a9-fe3e172a48d1"
+  bucket_name: "594c4f91-711b7067-2c84-4606-86db-514e42c63056"
   end_point: "https://s3.timeweb.cloud"
   region: "ru-1"
   access_key: "access_key"
