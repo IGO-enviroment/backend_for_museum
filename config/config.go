@@ -9,11 +9,12 @@ import (
 
 type (
 	Config struct {
-		App  `yaml:"app"`
-		HTTP `yaml:"http"`
-		Log  `yaml:"logger"`
-		PG   `yaml:"postgres"`
-		ENV  `yaml:"env"`
+		App       `yaml:"app"`
+		HTTP      `yaml:"http"`
+		Log       `yaml:"logger"`
+		PG        `yaml:"postgres"`
+		ENV       `yaml:"env"`
+		StorageS3 `yaml:"s3"`
 	}
 
 	App struct {
@@ -46,6 +47,14 @@ type (
 
 	ENV struct {
 		Level string `env-required:"true" yaml:"level" env:"ENV_LEVEL"`
+	}
+
+	StorageS3 struct {
+		EndPoint        string `env-required:"true" yaml:"end_point" env:"S3_ENDPOINT"`
+		AccessKey       string `env-required:"true" yaml:"access_key" env:"S3_ACCESS_KEY"`
+		SecretAccessKey string `env-required:"true" yaml:"secret_access_key" env:"S3_SECRET_ACCESS_KEY"`
+		BucketName      string `env-required:"true" yaml:"bucket_name" env:"S3_BUCKET_NAME"`
+		Region          string `env-required:"true" yaml:"region" env:"S3_REGION"`
 	}
 )
 
