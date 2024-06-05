@@ -1,0 +1,1 @@
+ALTER TABLE areas DROP COLUMN latitude, DROP COLUMN longitude;

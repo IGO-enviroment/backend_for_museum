@@ -114,6 +114,17 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypes.Get("/", eventTypesController.GetAll)
 	}
 
+	// Площадки
+	{
+		areas := admin.Group("/areas")
+		areasController := admin_handlers.NewAreasRoutes(s.db, s.l)
+		areas.Post("/create", areasController.Create)
+		areas.Get("/", areasController.Index)
+		areas.Get("/:id", areasController.GetById)
+		areas.Delete("/:id", areasController.DeleteById)
+		areas.Put("/:id", areasController.Update)
+	}
+
 	EventsRoutes(s, admin)
 
 	ContentBlocksRoutes(s, admin)
