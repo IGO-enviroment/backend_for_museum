@@ -97,15 +97,6 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		posts.Post("/", postsController.Create)
 	}
 
-	// Темы событий, новостей и т.д.
-	{
-		topics := admin.Group("/topics")
-		topicsController := admin_handlers.NewTopicRoutes(s.db, s.l)
-		topics.Put("/update/:id", topicsController.Update)
-		topics.Get("/", topicsController.Index)
-		topics.Post("/", topicsController.Create)
-	}
-
 	// Типы мероприйтий
 	{
 		eventTypes := admin.Group("/event-types")
@@ -114,6 +105,7 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypes.Get("/", eventTypesController.GetAll)
 		eventTypes.Delete("/:id", eventTypesController.Delete)
 		eventTypes.Put("/:id", eventTypesController.Update)
+		eventTypes.Get("/:id", eventTypesController.GetById)
 	}
 
 	// Площадки
@@ -125,6 +117,18 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		areas.Get("/:id", areasController.GetById)
 		areas.Delete("/:id", areasController.DeleteById)
 		areas.Put("/:id", areasController.Update)
+	}
+
+	// Тэги
+	{
+		tags := admin.Group("/tags")
+		tagsController := admin_handlers.NewTagsRoutes(s.db, s.l)
+		tags.Post("/create", tagsController.Create)
+		tags.Get("/", tagsController.Index)
+		tags.Get("/groups", tagsController.GetGroups)
+		tags.Get("/:id", tagsController.GetById)
+		tags.Delete("/:id", tagsController.DeleteById)
+		tags.Put("/:id", tagsController.Update)
 	}
 
 	EventsRoutes(s, admin)

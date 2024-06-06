@@ -262,7 +262,7 @@ func (c *AreasRoutes) Update(ctx *fiber.Ctx) error {
 	}
 	var areaEntity entity_admin.CreateAreaEntity
 	if err := ctx.BodyParser(&areaEntity); err != nil {
-		c.l.Error(err, "incorrect login model")
+		c.l.Error(err, "incorrect area model")
 		return handlers.ErrorResponse(ctx)
 	}
 

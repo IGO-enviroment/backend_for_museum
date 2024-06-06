@@ -1,5 +1,7 @@
 package admin
 
+import "time"
+
 type CreateEvent struct {
 	Title       string `form:"title" validate:"required|max_len:255" message:"required:Обязательное поле"`
 	Description string `form:"description,omitempty" validate:"max_len:10000" message:"max:Слишком большое поле"`
@@ -23,4 +25,13 @@ type CreateEventType struct {
 
 type PublishEvent struct {
 	ID int `json:"id" validate:"required,gte=0"`
+}
+
+type EventTypeById struct {
+	Id          int `json:"id" validate:"required,gte=0"`
+	Name        string
+	Description string
+	IsVisible   bool
+	CreatedAt   *time.Time
+	UpdatedAt   *time.Time
 }

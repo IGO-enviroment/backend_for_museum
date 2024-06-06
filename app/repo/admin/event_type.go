@@ -61,6 +61,7 @@ func (e EventTypeRepo) Get() ([]entity_admin.EventTypeEntity, error) {
 	var result []entity_admin.EventTypeEntity
 	sql, args, err := e.db.Builder.
 		Select(
+			"id",
 			"name",
 			"description",
 			"is_visible",
@@ -78,7 +79,7 @@ func (e EventTypeRepo) Get() ([]entity_admin.EventTypeEntity, error) {
 
 	for rows.Next() {
 		var eventType entity_admin.EventTypeEntity
-		err := rows.Scan(&eventType.Name, &eventType.Description, &eventType.IsVisible)
+		err := rows.Scan(&eventType.Id, &eventType.Name, &eventType.Description, &eventType.IsVisible)
 		if err != nil {
 			e.l.Error("Unable to scan INSERT query", err)
 			return nil, err

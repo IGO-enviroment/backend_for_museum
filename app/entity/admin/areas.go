@@ -13,8 +13,8 @@ type CreateAreaEntity struct {
 	Description  string  `json:"description"`
 	Publish      bool    `json:"publish"`
 	AddressValue string  `json:"addressValue"`
-	Longitude    float64 `json:"longitude"`
-	Latitude     float64 `json:"latitude"`
+	Longitude    float64 `json:"longitude" validate:"required"`
+	Latitude     float64 `json:"latitude"  validate:"required"`
 }
 
 type GetAreaEntity struct {
