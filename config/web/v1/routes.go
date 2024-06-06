@@ -112,6 +112,8 @@ func AdminsRoutes(s *Server, v1 fiber.Router) {
 		eventTypesController := admin_handlers.NewEventTypesRoutes(s.db, s.l)
 		eventTypes.Post("/create", eventTypesController.Create)
 		eventTypes.Get("/", eventTypesController.GetAll)
+		eventTypes.Delete("/:id", eventTypesController.Delete)
+		eventTypes.Put("/:id", eventTypesController.Update)
 	}
 
 	// Площадки
